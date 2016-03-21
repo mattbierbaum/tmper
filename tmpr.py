@@ -40,6 +40,7 @@ Usage :
     ARGS :
         key -- set a password for a particular file
         n   -- number of times a file can be downloaded
+        v   -- view the contents on website rather than download
 
 
 # function for .bashrc to simplify upload
