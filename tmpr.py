@@ -26,20 +26,25 @@ INDEX_CONTENT = \
 >
 
 <html><head><title>tmpr : file share</title></head>
-<div>
 <center><pre style='font-size:48px;'>TMPR : FILE SHARING</pre></center>
 <pre style='width:640px;margin:auto;'>
 Usage : 
-    GET         tmper/
-    GET         tmper/[CODE]?args
+    GET
+        tmper/              -- this information
+        tmper/[CODE]?ARGS   -- get a file given by CODE
 
-    POST        tmper/
-    POST        tmper/[CODE]?args
+    POST
+        tmper/              -- upload a file and receive a name
+        tmper/[CODE]?ARGS   -- upload file to a particular name
+
+    ARGS :
+        key -- set a password for a particular file
+        n   -- number of times a file can be downloaded
 </pre>
-<center>
-<form action='/' method='post'>
-<input type='file' name='file'><input type='submit'>
-</form></center>
+<!--<center>
+<form enctype="multipart/form-data" action='/' method='post'>
+<input type='file' id='filearg' name='filearg'><input type='submit' value='Upload'>
+</form></center>-->
 </html>
 """.format(favicon=FAVICON)
 
@@ -105,7 +110,6 @@ class MainHandler(tornado.web.RequestHandler):
         meta = {}
         meta['key'] = self.request.arguments.get('key', [None])[0]
         meta['n'] = int(self.request.arguments.get('n', [1])[0])
-        print meta, args
 
         if args and self.exists(args):
             # change to error occured since file already exists
@@ -116,7 +120,6 @@ class MainHandler(tornado.web.RequestHandler):
             name = args or self.unique_name()
             fobj = self.request.files.values()[0][0]
 
-            print fobj
             meta.update({'filename': fobj['filename']})
             self.save_file(name, fobj['body'], meta)
             self.write(name)
