@@ -105,22 +105,17 @@ class MainHandler(tornado.web.RequestHandler):
     def exists(self, name):
         return os.path.isfile(self.path(name))
 
-    def error_notfound(self, name):
+    def error(self, text):
         self.clear()
         self.set_status(404)
-        self.write("not found")
-
-    def error_exists(self, name):
-        self.clear()
-        self.set_status(404)
-        self.write("exists")
+        self.write(text)
 
     def get(self, args):
         if not args:
             self.write(INDEX_CONTENT)
         else:
             if not self.exists(args):
-                self.error_notfound(args)
+                self.error('not found')
                 return
 
             data, meta = self.open_file(args)
@@ -142,7 +137,7 @@ class MainHandler(tornado.web.RequestHandler):
 
         # change to error occured since file already exists
         if args and self.exists(args):
-            self.error_exists(args)
+            self.error('exists')
             return
 
         if len(self.request.files) == 1:
@@ -157,20 +152,9 @@ class MainHandler(tornado.web.RequestHandler):
             # write the file and return the accepted name
             self.save_file(name, body, meta)
             self.write(name)
-        elif len(self.request.files) > 1:
-            names = []
+            return
 
-            for _, fobj in self.request.files.iteritems():
-                name = self.unique_name()
-    
-                # separate the actual contents from the meta data
-                body = fobj.pop('body')
-                meta.update(fobj)
-
-                self.save_file(name, body, meta)
-                names.append(name)
-
-            self.write(json.dumps(names))
+        self.error('improper payload')
 
 if __name__ == "__main__":
     #web.ErrorHandler = webutil.ErrorHandler
