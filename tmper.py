@@ -14,7 +14,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 CHARS = string.ascii_lowercase + ''.join(map(str, xrange(10)))
 
 tornado.options.options.define("port", default=8888)
-tornado.options.options.define("root", default=ROOT, help='directory in which to store files')
+tornado.options.options.define("root", default=ROOT, help='directory for files')
 tornado.options.options.define("addr", default="127.0.0.1", help="port to listen on")
 
 FAVICON =  "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAGBQTFRFooKnN8jxY5PVM7vvM7zwY5LUN8fxo4KnhInAuX2Py3172oZtSZ/k5ZJjOa7s6pxbP9LyTNjy66VYVtryo4Vmqoxo57Fit5djvp1lw6Jnzaps17Fu3bNt47Rp6a1csZJmx8KbeAAAAEJJREFUOMtjEBGVl5cXl5CUkpaRlRWTkxPi5+Xm4mTgYOXhY2YTEBRmGNEK2EcVEKuAiRgFjFRXIEOqApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
@@ -25,9 +25,9 @@ INDEX_CONTENT = \
  href="data:image/png;base64,{favicon}"
 >
 
-<html><head><title>tmper : file share</title></head>
+<html><head><title>tmpr : file share</title></head>
 <div>
-<center><pre style='font-size:48px;'>TMPER : FILE SHARING</pre></center>
+<center><pre style='font-size:48px;'>TMPR : FILE SHARING</pre></center>
 <pre style='width:640px;margin:auto;'>
 Usage : 
     GET         tmper/
@@ -36,19 +36,17 @@ Usage :
     POST        tmper/
     POST        tmper/[CODE]?args
 </pre>
+<center>
+<form action='/' method='post'>
+<input type='file' name='file'><input type='submit'>
+</form></center>
 </html>
 """.format(favicon=FAVICON)
 
 class Application(tornado.web.Application):
     def __init__(self):
-        handlers = [
-            (r"/([a-z0-9]{2})?", MainHandler),
-        ]
-        settings = dict(
-            static_path=os.path.join(os.path.dirname(__file__), "f"),
-            gzip=True,
-        )
-        super(Application, self).__init__(handlers, **settings)
+        handlers = [(r"/([a-z0-9]{2})?", MainHandler)]
+        super(Application, self).__init__(handlers, gzip=True)
 
 class MainHandler(tornado.web.RequestHandler):
     def generate_name(self):
