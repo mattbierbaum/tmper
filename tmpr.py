@@ -22,8 +22,7 @@ FAVICON =  "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAA
 INDEX_CONTENT = \
 string.Template("""
 <link id="favicon" rel="shortcut icon" type="image/png"
- href="data:image/png;base64,{favicon}"
->
+ href="data:image/png;base64,$favicon">
 
 <html><head><title>tmpr : file share</title></head>
 <center><pre style='font-size:48px;'>TMPR : FILE SHARING</pre></center>
@@ -47,13 +46,39 @@ function tmpr() {
     curl -X POST -F file=@"$$1" &lt;url&gt;
 }
 </pre>
-<!--<center>
+<br/><center>
 <form enctype="multipart/form-data" action='/' method='post'>
-<input type='file' id='filearg' name='filearg'><input type='submit' value='Upload'>
-</form></center>-->
+<input type='submit' value='Upload'><input type='file' id='filearg' name='filearg'>
+</form></center>
+<!--<script type='text/javascript>
+document.getElementById("filearg").onchange = function() {
+    document.getElementById("form").submit();
+};
+</script>-->
 </html>
 """).substitute(favicon=FAVICON)
 
+NOTFOUND_CONTENT = \
+string.Template("""
+<link id="favicon" rel="shortcut icon" type="image/png"
+ href="data:image/png;base64,$favicon">
+
+<html><head><title>tmpr : file share</title></head>
+<center><pre style='font-size:48px;'>$name : NOT FOUND</pre></center>
+""")
+
+EXISTS_CONTENT = \
+string.Template("""
+<link id="favicon" rel="shortcut icon" type="image/png"
+ href="data:image/png;base64,$favicon">
+
+<html><head><title>tmpr : file share</title></head>
+<center><pre style='font-size:48px;'>$name : ALREADY EXISTS</pre></center>
+""")
+
+#=============================================================================
+# The actual web application now
+#=============================================================================
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [(r"/([a-z0-9]{2})?", MainHandler)]
@@ -98,10 +123,24 @@ class MainHandler(tornado.web.RequestHandler):
     def exists(self, name):
         return os.path.isfile(self.path(name))
 
+    def error_notfound(self, name):
+        self.clear()
+        self.set_status(404)
+        self.write(NOTFOUND_CONTENT.substitute(favicon=FAVICON, name=name))
+
+    def error_exists(self, name):
+        self.clear()
+        self.set_status(404)
+        self.write(EXISTS_CONTENT.substitute(favicon=FAVICON, name=name))
+
     def get(self, args):
         if not args:
             self.write(INDEX_CONTENT)
         else:
+            if not self.exists(args):
+                self.error_notfound(args)
+                return
+
             data, meta = self.open_file(args)
             meta['n'] -= 1
 
@@ -115,11 +154,14 @@ class MainHandler(tornado.web.RequestHandler):
     def post(self, args):
         meta = {}
         meta['key'] = self.request.arguments.get('key', [None])[0]
-        meta['n'] = int(self.request.arguments.get('n', [1])[0])
+        usern = int(self.request.arguments.get('n', [1])[0])
+        usern = max(min(usern, 10), 0)
 
+        meta['key'] = usern
         if args and self.exists(args):
             # change to error occured since file already exists
-            raise Exception
+            self.error_exists(args)
+            return
 
         if len(self.request.files) == 1:
             # we have files attached, save each of them to new file names
