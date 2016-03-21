@@ -20,7 +20,7 @@ tornado.options.options.define("addr", default="127.0.0.1", help="port to listen
 FAVICON =  "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAGBQTFRFooKnN8jxY5PVM7vvM7zwY5LUN8fxo4KnhInAuX2Py3172oZtSZ/k5ZJjOa7s6pxbP9LyTNjy66VYVtryo4Vmqoxo57Fit5djvp1lw6Jnzaps17Fu3bNt47Rp6a1csZJmx8KbeAAAAEJJREFUOMtjEBGVl5cXl5CUkpaRlRWTkxPi5+Xm4mTgYOXhY2YTEBRmGNEK2EcVEKuAiRgFjFRXIEOqApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
 
 INDEX_CONTENT = \
-"""
+string.Template("""
 <link id="favicon" rel="shortcut icon" type="image/png"
  href="data:image/png;base64,{favicon}"
 >
@@ -41,8 +41,10 @@ Usage :
         key -- set a password for a particular file
         n   -- number of times a file can be downloaded
 
+
+# function for .bashrc to simplify upload
 function tmpr() {
-    curl -X POST -F file=@"$1" <url>
+    curl -X POST -F file=@"$$1" &lt;url&gt;
 }
 </pre>
 <!--<center>
@@ -50,7 +52,7 @@ function tmpr() {
 <input type='file' id='filearg' name='filearg'><input type='submit' value='Upload'>
 </form></center>-->
 </html>
-""".format(favicon=FAVICON)
+""").substitute(favicon=FAVICON)
 
 class Application(tornado.web.Application):
     def __init__(self):
