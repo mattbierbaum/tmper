@@ -58,24 +58,6 @@ document.getElementById("filearg").onchange = function() {
 </html>
 """).substitute(favicon=FAVICON)
 
-NOTFOUND_CONTENT = \
-string.Template("""
-<link id="favicon" rel="shortcut icon" type="image/png"
- href="data:image/png;base64,$favicon">
-
-<html><head><title>tmpr : file share</title></head>
-<center><pre style='font-size:48px;'>$name : NOT FOUND</pre></center>
-""")
-
-EXISTS_CONTENT = \
-string.Template("""
-<link id="favicon" rel="shortcut icon" type="image/png"
- href="data:image/png;base64,$favicon">
-
-<html><head><title>tmpr : file share</title></head>
-<center><pre style='font-size:48px;'>$name : ALREADY EXISTS</pre></center>
-""")
-
 #=============================================================================
 # The actual web application now
 #=============================================================================
@@ -126,12 +108,12 @@ class MainHandler(tornado.web.RequestHandler):
     def error_notfound(self, name):
         self.clear()
         self.set_status(404)
-        self.write(NOTFOUND_CONTENT.substitute(favicon=FAVICON, name=name))
+        self.write("not found")
 
     def error_exists(self, name):
         self.clear()
         self.set_status(404)
-        self.write(EXISTS_CONTENT.substitute(favicon=FAVICON, name=name))
+        self.write("exists")
 
     def get(self, args):
         if not args:
@@ -156,10 +138,10 @@ class MainHandler(tornado.web.RequestHandler):
         meta['key'] = self.request.arguments.get('key', [None])[0]
         usern = int(self.request.arguments.get('n', [1])[0])
         usern = max(min(usern, 10), 0)
+        meta['n'] = usern
 
-        meta['key'] = usern
+        # change to error occured since file already exists
         if args and self.exists(args):
-            # change to error occured since file already exists
             self.error_exists(args)
             return
 
@@ -168,8 +150,12 @@ class MainHandler(tornado.web.RequestHandler):
             name = args or self.unique_name()
             fobj = self.request.files.values()[0][0]
 
-            meta.update({'filename': fobj['filename']})
-            self.save_file(name, fobj['body'], meta)
+            # separate the actual contents from the meta data
+            body = fobj.pop('body')
+            meta.update(fobj)
+
+            # write the file and return the accepted name
+            self.save_file(name, body, meta)
             self.write(name)
         elif len(self.request.files) > 1:
             names = []
@@ -177,8 +163,11 @@ class MainHandler(tornado.web.RequestHandler):
             for _, fobj in self.request.files.iteritems():
                 name = self.unique_name()
     
-                meta.update('filename', fobj['filename'])
-                self.save_file(name, fobj['body'], meta)
+                # separate the actual contents from the meta data
+                body = fobj.pop('body')
+                meta.update(fobj)
+
+                self.save_file(name, body, meta)
                 names.append(name)
 
             self.write(json.dumps(names))
