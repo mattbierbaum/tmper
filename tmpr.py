@@ -116,7 +116,6 @@ class MainHandler(tornado.web.RequestHandler):
         self.set_header('Content-Type', meta['content_type'])
         self.set_header('Content-Disposition', 'attachment; filename=' + meta['filename'])
         self.write(data)
-        self.finish()
 
     def write_formatted(self, data, meta):
         typ = meta['content_type']
@@ -140,9 +139,15 @@ class MainHandler(tornado.web.RequestHandler):
                 return
 
             data, meta = self.open_file(args)
-            meta['n'] -= 1
+
+            # check the key is present if required
+            if meta['key']:
+                if not meta['key'] == self.request.arguments.get('key', [''])[0]:
+                    self.error('key invalid')
+                    return
 
             # either delete the file or update the view count in the meta data
+            meta['n'] -= 1
             if meta['n'] == 0:
                 self.delete_file(args)
             else:
@@ -151,8 +156,10 @@ class MainHandler(tornado.web.RequestHandler):
             # if we are on command line, just return data, otherwise display it pretty
             if 'curl' in agent or 'Wget' in agent:
                 self.write(data)
-            else:
+            elif 'v' in self.request.arguments.keys():
                 self.write_formatted(data, meta)
+            else:
+                self.serve_file(data, meta)
             self.finish()
 
     def post(self, args):
