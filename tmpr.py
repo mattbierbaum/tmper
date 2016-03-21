@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import string
 import random
 
@@ -109,10 +110,30 @@ class MainHandler(tornado.web.RequestHandler):
         self.clear()
         self.set_status(404)
         self.write(text)
+        self.finish()
+
+    def serve_file(self, data, meta):
+        self.set_header('Content-Type', meta['content_type'])
+        self.set_header('Content-Disposition', 'attachment; filename=' + meta['filename'])
+        self.write(data)
+        self.finish()
+
+    def write_formatted(self, data, meta):
+        typ = meta['content_type']
+
+        if 'image' in typ:
+            self.write("<img src='data:%s;base64,%s'/>" % (typ, base64.b64encode(data)))
+        elif 'text' in typ:
+            self.write('<pre>%s</pre>' % data)
+        else:
+            self.serve_file(data, meta)
 
     def get(self, args):
+        agent = self.request.headers['User-Agent']
+
         if not args:
             self.write(INDEX_CONTENT)
+            self.finish()
         else:
             if not self.exists(args):
                 self.error('not found')
@@ -121,12 +142,18 @@ class MainHandler(tornado.web.RequestHandler):
             data, meta = self.open_file(args)
             meta['n'] -= 1
 
+            # either delete the file or update the view count in the meta data
             if meta['n'] == 0:
                 self.delete_file(args)
             else:
                 self.save_file(args, data, meta)
 
-            self.write(data)
+            # if we are on command line, just return data, otherwise display it pretty
+            if 'curl' in agent or 'Wget' in agent:
+                self.write(data)
+            else:
+                self.write_formatted(data, meta)
+            self.finish()
 
     def post(self, args):
         meta = {}
@@ -152,6 +179,7 @@ class MainHandler(tornado.web.RequestHandler):
             # write the file and return the accepted name
             self.save_file(name, body, meta)
             self.write(name)
+            self.finish()
             return
 
         self.error('improper payload')
