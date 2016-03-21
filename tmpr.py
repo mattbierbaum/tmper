@@ -40,6 +40,10 @@ Usage :
     ARGS :
         key -- set a password for a particular file
         n   -- number of times a file can be downloaded
+
+function tmpr() {
+    curl -X POST -F file=@"$1" <url>
+}
 </pre>
 <!--<center>
 <form enctype="multipart/form-data" action='/' method='post'>
