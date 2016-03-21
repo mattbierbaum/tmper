@@ -49,6 +49,7 @@ function tmpr() {
 </pre>
 <br/><center>
 <form enctype="multipart/form-data" action='/' method='post'>
+n: <input type='text' name='n' style='width:20px;text-align:right;' value=1>
 <input type='submit' value='Upload'><input type='file' id='filearg' name='filearg'>
 </form></center>
 <!--<script type='text/javascript>
