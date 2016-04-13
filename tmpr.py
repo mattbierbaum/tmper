@@ -70,6 +70,10 @@ class Application(tornado.web.Application):
         super(Application, self).__init__(handlers, gzip=True)
 
 class MainHandler(tornado.web.RequestHandler):
+    def prepare(self, *args, **kwargs):
+        self.request.connection.set_max_body_size(int(1e8))
+        super(MainHandler, self).prepare(*args, **kwargs)
+
     def generate_name(self):
         return ''.join([random.choice(CHARS) for i in xrange(2)])
 
