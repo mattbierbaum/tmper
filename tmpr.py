@@ -26,27 +26,39 @@ string.Template("""
  href="data:image/png;base64,$favicon">
 
 <html><head><title>tmpr : file share</title></head>
-<center><pre style='font-size:48px;'>TMPR : FILE SHARING</pre></center>
-<pre style='width:640px;margin:auto;'>
-Usage : 
-    GET
-        tmper/              -- this information
-        tmper/[CODE]?ARGS   -- get a file given by CODE
+<body style='background:url(data:image/png;base64,$favicon);background-size: 100% auto;'>
+<center><pre style='font-size:48px;margin:10px;'>TMPR : FILE SHARING</pre></center>
+<pre style='width:640px;margin:auto;background-color:rgba(255,255,255,0.5);padding:10px;'>
+Temporary file sharing using simple two digit codes (1296 unique). Each file
+can have a max number of downloads and password associated with it, defaults
+are 1 download and no password. Max upload size of 128M.
 
-    POST
-        tmper/              -- upload a file and receive a name
-        tmper/[CODE]?ARGS   -- upload file to a particular name
+GET
+    /               -- this information
+    /CODE?ARGS      -- get a file given by CODE
 
-    ARGS :
+    ARGS (optional) :
+        key - password associated with the file
+        v - view contents on website rather than raw download
+
+    Examples :
+        curl http://URL/ui
+        curl http://URL/ab?key=supersecretpassword
+        firefox http://URL/7e?v
+
+POST
+    /?ARGS          -- upload a file and receive a name
+    /CODE?ARGS      -- upload file to a particular name
+
+    ARGS (optional) :
         key -- set a password for a particular file
-        n   -- number of times a file can be downloaded
-        v   -- view the contents on website rather than download
+        n   -- set number of times a file can be downloaded
 
+    Example :
+        curl -XPOST -F file=@filename http://URL/?key=secretpassword&n=3
 
 # function for .bashrc to simplify upload
-function tmpr() {
-    curl -X POST -F file=@"$$1" &lt;url&gt;
-}
+function tmpr() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
 </pre>
 <br/><center>
 <form enctype="multipart/form-data" action='/' method='post'>
@@ -58,7 +70,7 @@ document.getElementById("filearg").onchange = function() {
     document.getElementById("form").submit();
 };
 </script>-->
-</html>
+</body></html>
 """).substitute(favicon=FAVICON)
 
 #=============================================================================
