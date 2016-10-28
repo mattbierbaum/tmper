@@ -46,6 +46,20 @@ Temporary file sharing using simple two digit codes (1296 unique). Each file
 can have a max number of downloads and password associated with it, defaults
 are 1 download and no password. Max upload size of 128M.
 
+To upload and download from command line, we recommend using tmpr as well. This
+can be done by the short commands u, d (see `tmpr --help` for details).
+
+    pip install tmpr
+    tmpr c --url=&lt;some url&gt;
+    tmpr u /path/to/some/file   # return 2 digit code
+    tmpr d &lt;code&gt;
+
+You can also start a server of your own using:
+
+    tmpr s
+
+The full documentation of end points is provided here:
+
 GET
     /               -- this information
     /CODE?ARGS      -- get a file given by CODE
