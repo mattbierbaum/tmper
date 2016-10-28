@@ -6,7 +6,7 @@ files between many people with a set number of downloads (default 1, max 10).
 
 In the basic form, simply run:
 
-    ./tmpr.py
+    tmpr s      # 's' is short for serve, see tmpr --help
 
 and point your browser to http://127.0.0.1:8888.  From there, you can follow
 the directions to upload and download files.  By default, it only runs on the

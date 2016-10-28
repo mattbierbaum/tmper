@@ -259,6 +259,10 @@ def download(url, code, password='', browser=False):
     url = url or conf_read('url')
     password = password or conf_read('pass')
 
+    if not url:
+        print("No URL provided! Provide one or set on via conf.")
+        sys.exit(1)
+
     arg = argformat({'key': password})
     rqt = '{}{}'.format(urlparse.urljoin(url, code), arg)
 
@@ -294,6 +298,10 @@ def upload(url, filename, code='', password='', num=None):
     """ Upload the file 'filename' to tmpr url """
     url = url or conf_read('url')
     password = password or conf_read('pass')
+
+    if not url:
+        print("No URL provided! Provide one or set on via conf.")
+        sys.exit(1)
 
     url = url if not code else urlparse.urljoin(url, code)
     arg = {} if not password else {'key': password}
@@ -379,7 +387,7 @@ if __name__ == "__main__":
     # custom arguments for server action
     p_serve.add_argument("-a", "--addr", type=str, default='127.0.0.1',
         help="interface / address on which to run the service")
-    p_serve.add_argument("-p", "--port", type=int, default=3333,
+    p_serve.add_argument("-p", "--port", type=int, default=8888,
         help="port on which to run the server")
     p_serve.add_argument("-r", "--root", type=str, default=ROOT,
         help="directory in which to store the uploaded files")
