@@ -15,11 +15,13 @@ def readme():
 setup(name='tmpr',
       license='MIT License',
       author='Matt Bierbaum',
+      url='https://github.com/mattbierbaum/tmpr',
       version=version(),
 
       install_requires=["tornado>=4.3"],
       scripts=['tmpr'],
 
-      summary='Temporary file sharing using simple two digit codes.',
+      platforms='osx, posix, linux, windows',
+      description='Temporary file sharing using simple two digit codes.',
       long_description=readme(),
 )
