@@ -24,7 +24,8 @@ except:
     import urllib.parse as urlparse
     from urllib.parse import urlencode
 
-__version__ = '0.4'
+import pkg_resources
+__version__ = pkg_resources.require("tmpr")[0].version
 
 #=============================================================================
 # web server functions and data
