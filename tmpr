@@ -35,35 +35,114 @@ __version__ = pkg_resources.require("tmpr")[0].version
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 CHARS = string.ascii_lowercase + ''.join(map(str, range(10)))
 
-FAVICON =  "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAGBQTFRFooKnN8jxY5PVM7vvM7zwY5LUN8fxo4KnhInAuX2Py3172oZtSZ/k5ZJjOa7s6pxbP9LyTNjy66VYVtryo4Vmqoxo57Fit5djvp1lw6Jnzaps17Fu3bNt47Rp6a1csZJmx8KbeAAAAEJJREFUOMtjEBGVl5cXl5CUkpaRlRWTkxPi5+Xm4mTgYOXhY2YTEBRmGNEK2EcVEKuAiRgFjFRXIEOqApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
+FAVICON = (
+    "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAGBQT"
+    "FRFooKnN8jxY5PVM7vvM7zwY5LUN8fxo4KnhInAuX2Py3172oZtSZ/k5ZJjOa7s6pxbP9LyTN"
+    "jy66VYVtryo4Vmqoxo57Fit5djvp1lw6Jnzaps17Fu3bNt47Rp6a1csZJmx8KbeAAAAEJJREF"
+    "UOMtjEBGVl5cXl5CUkpaRlRWTkxPi5+Xm4mTgYOXhY2YTEBRmGNEK2EcVEKuAiRgFjFRXIEOq"
+    "ApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
+)
 
 INDEX_CONTENT = \
 string.Template("""
 <link id="favicon" rel="shortcut icon" type="image/png"
  href="data:image/png;base64,$favicon">
+<html>
 
-<html><head><title>tmpr : file share</title></head>
-<body style='background:url(data:image/png;base64,$favicon);background-size: 100% auto;'>
+<head>
+<title>tmpr : file share</title>
+<style media="screen" type="text/css">
+.prebox {
+    width: 640px;
+    margin: auto;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 10px;
+}
+
+.inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+    cursor: pointer;
+}
+
+#label {
+    cursor: pointer;
+}
+
+#upload {
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.4);
+    font-size: 26px;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+}
+
+#num {
+    width: 50px;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 24px;
+    background-color: rgba(0,0,0,0.4);
+    border: none;
+    color: white;
+}
+
+a {
+    text-decoration: none;
+    color: #444444;
+}
+</style>
+</head>
+
+<body style='background:url(data:image/png;base64,$favicon);background-size: 100% auto; margin: 30px;'>
 <center><pre style='font-size:48px;margin:10px;'>TMPR : FILE SHARING</pre></center>
-<pre style='width:640px;margin:auto;background-color:rgba(255,255,255,0.5);padding:10px;'>
+$content
+</body></html>""")
+
+FORM_CONTENT = """
+<center><a href='/help'><h2>HELP</h2></a></center>
+<br/><center>
+<form enctype="multipart/form-data" action='/' method='post'>
+<input type='file' id='filearg' name='filearg' class='inputfile'/><br/><!-- onchange="javascript:this.form.submit();"/><br/>-->
+<label for='filearg' id='label'><svg width="512" height="512" viewBox="0 0 256 256" style='fill: rgba(0,0,0,0.4);'><g transform="scale(0.25 0.25)"><path d="M576 256l-128-128h-448v832h1024v-704h-448zM512 480l224 224h-160v256h-128v-256h-160l224-224z"></path></g></svg><span></span></label>
+<br/><input id='upload' type='submit' value='Upload'>
+<br/><input type='text' name='n' id='num' value=1>
+</form></center>
+"""
+
+HELP_CONTENT = """
+<center><h2>Introduction</h2></center>
+<pre class='prebox'>
 Temporary file sharing using simple two digit codes (1296 unique). Each file
 can have a max number of downloads and password associated with it, defaults
 are 1 download and no password. Max upload size of 128M.
+
+You can upload and download from the web. After uploading from the main site,
+you will be given a 2 digit code which you may share. A particular code may be
+downloaded by visiting http://thesite.com/&lt;code&gt;.
 
 To upload and download from command line, we recommend using tmpr as well. This
 can be done by the short commands u, d (see `tmpr --help` for details).
 
     pip install tmpr
-    tmpr c --url=&lt;some url&gt;
-    tmpr u /path/to/some/file   # return 2 digit code
-    tmpr d &lt;code&gt;
+    tmpr c --url=&lt;some url&gt;       # set the default tmpr url
+    tmpr u /path/to/some/file     # upload file and get 2 digit code
+    tmpr d &lt;code&gt;                 # download the code
 
 You can also start a server of your own using:
 
-    tmpr s
+    tmpr s --port=&lt;port&gt;
+</pre>
 
-The full documentation of end points is provided here:
-
+<center><h2>API endpoints</h2></center>
+<pre id='endpoints' class='prebox'>
 GET
     /               -- this information
     /CODE?ARGS      -- get a file given by CODE
@@ -91,26 +170,26 @@ POST
 # function for .bashrc to simplify upload
 function tmpr() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
 </pre>
-<br/><center>
-<form enctype="multipart/form-data" action='/' method='post'>
-n: <input type='text' name='n' style='width:20px;text-align:right;' value=1>
-<input type='submit' value='Upload'><input type='file' id='filearg' name='filearg'>
-</form></center>
-<!--<script type='text/javascript>
-document.getElementById("filearg").onchange = function() {
-    document.getElementById("form").submit();
-};
-</script>-->
-</body></html>
-""").substitute(favicon=FAVICON)
+"""
+
+PAGE_INDEX = INDEX_CONTENT.substitute(favicon=FAVICON, content=FORM_CONTENT)
+PAGE_HELP = INDEX_CONTENT.substitute(favicon=FAVICON, content=HELP_CONTENT)
 
 #=============================================================================
 # The actual web application now
 #=============================================================================
 class Application(tornado.web.Application):
     def __init__(self):
-        handlers = [(r"/([a-z0-9]{2})?", MainHandler)]
+        handlers = [
+            (r"/help", HelpHandler),
+            (r"/([a-z0-9]{2})?", MainHandler)
+        ]
         super(Application, self).__init__(handlers, gzip=True)
+
+class HelpHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write(PAGE_HELP)
+        self.finish()
 
 class MainHandler(tornado.web.RequestHandler):
     def prepare(self, *args, **kwargs):
@@ -186,7 +265,7 @@ class MainHandler(tornado.web.RequestHandler):
         agent = self.request.headers['User-Agent']
 
         if not args:
-            self.write(INDEX_CONTENT)
+            self.write(PAGE_INDEX)
             self.finish()
         else:
             if not self.exists(args):
@@ -418,7 +497,7 @@ if __name__ == "__main__":
     kw = {'formatter_class': ShortFormatter}
     kw2 = dict(kw, parents=[shared])
 
-    p_conf= sub.add_parser(help="configure defaults for tmpr", **dict(_fmt('conf'), **kw2))
+    p_conf = sub.add_parser(help="configure defaults for tmpr", **dict(_fmt('conf'), **kw2))
     p_serve = sub.add_parser(help="run the tmpr.py webserver", **dict(_fmt('serve'), **kw))
     p_upload = sub.add_parser(help="upload a file to tmpr", **dict(_fmt('upload'), **kw2))
     p_download = sub.add_parser(help="download an uploaded file", **dict(_fmt('download'), **kw2))
