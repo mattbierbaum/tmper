@@ -4,7 +4,16 @@ tmpr : temp file sharing
 A very simple file sharing utility that launches quickly and allows sharing
 files between many people with a set number of downloads (default 1, max 10).
 
-In the basic form, simply run::
+If there is an existing server then you can easily interact with it through
+the command line interface. In this case, set the global url option then
+upload and download::
+
+    tmpr c --url=http://some.url.com/
+    tmpr u /some/file
+    tmpr d <code>
+
+For more information, look into tmpr --help. If there is no server you can
+easily start one yourself. In the basic form, simply run::
 
     tmpr s      # 's' is short for serve, see tmpr --help
 
