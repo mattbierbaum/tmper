@@ -24,7 +24,7 @@ except:
     import urllib.parse as urlparse
     from urllib.parse import urlencode
 
-__version__ = '0.2b'
+__version__ = '0.3a'
 
 #=============================================================================
 # web server functions and data
