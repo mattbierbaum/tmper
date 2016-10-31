@@ -20,8 +20,11 @@ try:
     import urlparse
     from urllib import urlencode
 except:
+    # Python3 imports
     import urllib.parse as urlparse
     from urllib.parse import urlencode
+
+__version__ = '0.2b'
 
 #=============================================================================
 # web server functions and data
@@ -159,7 +162,7 @@ class MainHandler(tornado.web.RequestHandler):
 
     def serve_file_headers(self, meta):
         self.set_header('Content-Type', meta['content_type'])
-        self.set_header('Content-Disposition', 'attachment; filename=' + meta['filename'])
+        self.set_header('Content-Disposition', 'attachment; filename='+meta['filename'])
 
     def serve_file(self, data, meta):
         self.serve_file_headers(meta)
@@ -169,10 +172,13 @@ class MainHandler(tornado.web.RequestHandler):
         typ = meta['content_type']
 
         if 'image' in typ:
+            # display images directly in browser
             self.write("<img src='data:%s;base64,%s'/>" % (typ, base64.b64encode(data)))
         elif 'text' in typ:
+            # display code and text in pre block
             self.write('<pre>%s</pre>' % data)
         else:
+            # otherwise, just download the file like usual
             self.serve_file(data, meta)
 
     def get(self, args):
@@ -203,7 +209,7 @@ class MainHandler(tornado.web.RequestHandler):
 
             # if we are on command line, just return data, otherwise display it pretty
             if 'curl' in agent or 'Wget' in agent:
-                self.write(data)
+                self.serve_file(data, meta)
             elif 'v' in self.request.arguments.keys():
                 self.write_formatted(data, meta)
             else:
@@ -277,14 +283,16 @@ def download(url, code, password='', browser=False):
         print("No URL provided! Provide one or set on via conf.")
         sys.exit(1)
 
-    arg = argformat({'key': password})
-    rqt = '{}{}'.format(urlparse.urljoin(url, code), arg)
-
     if browser:
+        arg = argformat({'key': password, 'v': 1})
+        rqt = '{}{}'.format(urlparse.urljoin(url, code), arg)
         webbrowser.open(rqt, new=True)
         return
 
-    response = requests.get(rqt)
+    arg = argformat({'key': password})
+    rqt = '{}{}'.format(urlparse.urljoin(url, code), arg)
+    hdr = {'User-Agent': 'tmpr/{}'.format(__version__)}
+    response = requests.get(rqt, headers=hdr)
 
     # if we get an error, print the error and stop
     if response.status_code != 200:
@@ -295,6 +303,7 @@ def download(url, code, password='', browser=False):
     contents = response.content
     response.close()
 
+    # extract the intended filename from the headers
     filename = re.match('.*filename=(.*)$', headers['Content-Disposition']).groups()[0]
 
     # make sure we are not overwriting any files by appending numbers to the end
@@ -328,7 +337,8 @@ def upload(url, filename, code='', password='', num=None):
         sys.exit(1)
 
     with open(filename) as f:
-        r = requests.post(url, data=arg, files={name: f.read()})
+        hdr = {'User-Agent': 'tmpr/{}'.format(__version__)}
+        r = requests.post(url, data=arg, files={name: f.read()}, headers=hdr)
         print(r.content.decode('utf-8'))
 
 #=============================================================================
@@ -366,9 +376,28 @@ class ShortFormatter(argparse.HelpFormatter):
     def _get_default_metavar_for_positional(self, action):
         return action.dest
 
+    # also raw print the description text
+    def _fill_text(self, text, width, indent):
+        return ''.join([indent + line for line in text.splitlines(True)])
+
+description = "Simple file sharing utility with download limits and password protection"
+epilog = """
+Example usage:
+    # set the default url, upload a file, and download the file
+    tmpr c --url=http://tmpr.meganet.com/
+    tmpr u /path/to/file
+    tmpr d yu
+
+    # upload a file with a password
+    tmpr upload --pass=34lkjsmdfn3i4usldf filename.txt
+
+    # upload to a particular code
+    tmpr upload -c 00 filename.txt
+"""
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=
-        "Simple file sharing utility with download limits and password protection",
+    parser = argparse.ArgumentParser(
+        description=description, epilog=epilog,
         formatter_class=ShortFormatter
     )
     sub = parser.add_subparsers()
@@ -419,6 +448,9 @@ if __name__ == "__main__":
         help="open the file in a browser"
     )
     p_download.add_argument("code", type=str, help="code of download file")
+
+    # version information
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s '+__version__)
 
     args = vars(parser.parse_args())
     action = args.get('action')
