@@ -4,7 +4,7 @@ tmpr : temp file sharing
 A very simple file sharing utility that launches quickly and allows sharing
 files between many people with a set number of downloads (default 1, max 10).
 
-In the basic form, simply run:
+In the basic form, simply run::
 
     tmpr s      # 's' is short for serve, see tmpr --help
 
@@ -14,7 +14,7 @@ local interface. It is recommended that if you wish the server to be available
 remotely to run it behind a webserver such as nginx or apache with forwarding
 set up between the two (so root privileges are not required).
 
-nginx setup notes, especially for larger max file sizes:
+nginx setup notes, especially for larger max file sizes::
 
     server {
         listen 80;
