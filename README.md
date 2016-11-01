@@ -8,9 +8,9 @@ If there is an existing server then you can easily interact with it through
 the command line interface. In this case, set the global url option then
 upload and download::
 
-    tmpr c --url=http://some.url.com/
-    tmpr u /some/file
-    tmpr d <code>
+    tmpr c --url=http://some.url.com/       # configure a global url
+    tmpr u /some/file                       # upload a file and receive code
+    tmpr d <code>                           # download file code
 
 For more information, look into tmpr --help. If there is no server you can
 easily start one yourself. In the basic form, simply run::
@@ -19,11 +19,15 @@ easily start one yourself. In the basic form, simply run::
 
 and point your browser to http://127.0.0.1:8888.  From there, you can follow
 the directions to upload and download files.  By default, it only runs on the
-local interface. It is recommended that if you wish the server to be available
-remotely to run it behind a webserver such as nginx or apache with forwarding
-set up between the two (so root privileges are not required).
+local interface. 
 
-nginx setup notes, especially for larger max file sizes::
+nginx setup
+===========
+
+It is recommended that if you wish the server to be available remotely to run
+it behind a webserver such as nginx or apache with forwarding set up between
+the two (so root privileges are not required).  Here is a sample setup,
+especially for larger max file sizes::
 
     server {
         listen 80;

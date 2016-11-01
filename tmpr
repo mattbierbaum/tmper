@@ -11,7 +11,6 @@ import random
 import argparse
 import webbrowser
 import requests
-import urllib
 
 import tornado.web
 import tornado.ioloop
@@ -124,8 +123,8 @@ Temporary file sharing using simple two digit codes (1296 unique). Each file
 can have a max number of downloads and password associated with it, defaults
 are 1 download and no password. Max upload size of 128M.
 
-You can upload and download from the web. After uploading from the main site,
-you will be given a 2 digit code which you may share. A particular code may be
+You can upload and download from the web. After uploading to the main site, you
+will be given a 2 digit code which you may share. A particular code may then be
 downloaded by visiting http://thesite.com/&lt;code&gt;.
 
 To upload and download from command line, we recommend using tmpr as well. This
@@ -376,7 +375,11 @@ def download(url, code, password='', browser=False):
 
     # if we get an error, print the error and stop
     if response.status_code != 200:
-        print("Code '{}' not found at '{}', '{}'".format(code, url, response.content.decode('utf-8')))
+        print(
+            "Code '{}' not found at '{}', '{}'".format(
+                code, url, response.content.decode('utf-8')
+            ), file=sys.stderr
+        )
         sys.exit(1)
 
     headers = response.headers
@@ -397,23 +400,25 @@ def download(url, code, password='', browser=False):
     with open(filename, 'wb') as f:
         f.write(contents)
 
+    print(filename)
+
 def upload(url, filename, code='', password='', num=None):
     """ Upload the file 'filename' to tmpr url """
     url = url or conf_read('url')
     password = password or conf_read('pass')
 
     if not url:
-        print("No URL provided! Provide one or set on via conf.")
+        print("No URL provided! Provide one or set on via conf.", file=sys.stderr)
         sys.exit(1)
 
     url = url if not code else urlparse.urljoin(url, code)
     arg = {} if not password else {'key': password}
-    arg = arg if num == 1 else dict(arg, N=num)
+    arg = arg if num == 1 else dict(arg, n=num)
 
     name = os.path.basename(filename)
 
     if not os.path.exists(filename):
-        print("File '{}' does not exist".format(filename))
+        print("File '{}' does not exist".format(filename), file=sys.stderr)
         sys.exit(1)
 
     with open(filename) as f:
@@ -487,7 +492,7 @@ if __name__ == "__main__":
     shared.add_argument("-u", "--url", type=str, default='',
         help="URL of tmpr service with which to interact")
     shared.add_argument("-p", "--pass", type=str, default='',
-        help="Password for uploaded file")
+        help="password for uploaded file")
 
     # the sub actions that can be performed
     def _fmt(name):
@@ -498,7 +503,7 @@ if __name__ == "__main__":
     kw2 = dict(kw, parents=[shared])
 
     p_conf = sub.add_parser(help="configure defaults for tmpr", **dict(_fmt('conf'), **kw2))
-    p_serve = sub.add_parser(help="run the tmpr.py webserver", **dict(_fmt('serve'), **kw))
+    p_serve = sub.add_parser(help="run the tmpr webserver", **dict(_fmt('serve'), **kw))
     p_upload = sub.add_parser(help="upload a file to tmpr", **dict(_fmt('upload'), **kw2))
     p_download = sub.add_parser(help="download an uploaded file", **dict(_fmt('download'), **kw2))
 
