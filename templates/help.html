@@ -17,9 +17,9 @@
 <br/><br/>
 <center><h2>Introduction</h2></center>
 <pre class='prebox'>
-Temporary file sharing using simple two digit codes (1296 unique). Each file
-can have a max number of downloads and password associated with it, defaults
-are 1 download and no password. Max upload size of 128M.
+TMPR provides temporary file sharing using simple two digit codes (1296
+unique). Each file can have a max number of downloads and password associated
+with it, defaults are 1 download and no password. Max upload size of 128M.
 
 You can upload and download from the web. After uploading to the main site, you
 will be given a 2 digit code which you may share. A particular code may then be
@@ -41,7 +41,8 @@ You can also start a server of your own using:
 <center><h2>API endpoints</h2></center>
 <pre id='endpoints' class='prebox'>
 GET
-    /               -- this information
+    /               -- landing site with upload
+    /help           -- this information
     /CODE?ARGS      -- get a file given by CODE
 
     ARGS (optional) :

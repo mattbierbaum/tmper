@@ -48,6 +48,8 @@ PAGE_DOWNLOAD = loader.load("download.html").generate(**subs)
 TMPL_CODE = string.Template(PAGE_CODE)
 TMPL_ERROR = string.Template(PAGE_ERROR)
 
+# flexible configuration options
+MAX_DOWNLOADS = 3
 CODE_LEN = 2
 ALL_CODES = None
 USED_CODES = None
@@ -175,7 +177,7 @@ class MainHandler(tornado.web.RequestHandler):
             # check the key is present if required
             if meta['key']:
                 if not meta['key'] == self.request.arguments.get('key', [''])[0]:
-                    self.error('key invalid')
+                    self.error('invalid key')
                     return
 
             # either delete the file or update the view count in the meta data
@@ -198,7 +200,7 @@ class MainHandler(tornado.web.RequestHandler):
         meta = {}
         meta['key'] = self.request.arguments.get('key', [None])[0]
         usern = int(self.request.arguments.get('n', [1])[0])
-        usern = max(min(usern, 10), 0)
+        usern = max(min(usern, MAX_DOWNLOADS), 0)
         meta['n'] = usern
 
         # change to error occured since file already exists
