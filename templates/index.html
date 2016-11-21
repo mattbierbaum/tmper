@@ -1,0 +1,96 @@
+{% extends "head.html" %}
+
+{% block style %}
+.inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+    cursor: pointer;
+}
+
+#folder {
+    cursor: pointer;
+    fill: rgba(0,0,0,0.4);
+    transition: fill 0.5s ease;
+}
+
+#folder:hover {
+    transition: fill 0.5s ease;
+    fill: rgba(0,0,0,0.6);
+}
+
+#upload {
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.4);
+    font-size: 26px;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+}
+
+#backer {
+    display: inline-block;
+    background-color: rgba(0,0,0,0.4);
+    margin-top: 10px;
+}
+
+#countlbl {
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    padding-left: 12px;
+    text-align: center;
+    height: 45px;
+    line-height: 45px;
+}
+
+#num {
+    padding: 0;
+    height: 45px;
+    width: 45px;
+    text-align: center;
+    font-size: 24px;
+    background-color: rgba(0,0,0,0.0);
+    border: none;
+    color: white;
+    margin: 0;
+}
+
+{% end %}
+
+{% block content %}
+<script type='text/javascript'>
+window.onload = function() {
+    elm = document.getElementById('filearg');
+    fld = document.getElementById('folder');
+
+    function nodefault(e){
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    yhl = function(e) { nodefault(e); fld.classList.add('drag-hl'); }
+    nhl = function(e) { nodefault(e); fld.classList.remove('drag-hl'); }
+    fld.ondragenter = yhl;
+    fld.ondrop = yhl;
+}
+</script>
+<br/>
+
+<center>
+<form enctype="multipart/form-data" action='/' method='post'>
+<input type='file' id='filearg' name='filearg' class='inputfile'/><br/><!-- onchange="javascript:this.form.submit();"/><br/>-->
+<label for='filearg' ><svg id='folder' width="512" height="416" viewBox="0 0 256 256"><g transform="scale(0.25 0.25)"><path d="M576 256l-128-128h-448v832h1024v-704h-448zM512 480l224 224h-160v256h-128v-256h-160l224-224z"></path></g></svg><span></span></label>
+<br/><input id='upload' type='submit' value='Upload'>
+<br/>
+<div id='backer'>
+<label for='n' id='countlbl'>COUNT: </label>
+<input type='text' name='n' id='num' value=1>
+</div>
+</form>
+</center>
+{% end %}

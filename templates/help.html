@@ -1,0 +1,69 @@
+{% extends "head.html" %}
+
+{% block content %}
+{% whitespace all %}
+
+<br/><br/>
+<center><h2>Introduction</h2></center>
+<pre class='prebox'>
+Temporary file sharing using simple two digit codes (1296 unique). Each file
+can have a max number of downloads and password associated with it, defaults
+are 1 download and no password. Max upload size of 128M.
+
+You can upload and download from the web. After uploading to the main site, you
+will be given a 2 digit code which you may share. A particular code may then be
+downloaded by visiting http://thesite.com/&lt;code&gt;.
+
+To upload and download from command line, we recommend using tmpr as well. This
+can be done by the short commands u, d (see `tmpr --help` for details).
+
+    pip install tmpr
+    tmpr c --url=&lt;some url&gt;       # set the default tmpr url
+    tmpr u /path/to/some/file     # upload file and get 2 digit code
+    tmpr d &lt;code&gt;                 # download the code
+
+You can also start a server of your own using:
+
+    tmpr s --port=&lt;port&gt;
+</pre>
+
+<center><h2>API endpoints</h2></center>
+<pre id='endpoints' class='prebox'>
+GET
+    /               -- this information
+    /CODE?ARGS      -- get a file given by CODE
+
+    ARGS (optional) :
+        key - password associated with the file
+        v - view contents on website rather than raw download
+
+    Examples :
+        curl http://URL/ui
+        curl http://URL/ab?key=supersecretpassword
+        firefox http://URL/7e?v
+
+POST
+    /?ARGS          -- upload a file and receive a name
+    /CODE?ARGS      -- upload file to a particular name
+
+    ARGS (optional) :
+        key -- set a password for a particular file
+        n   -- set number of times a file can be downloaded
+
+    Example :
+        curl -XPOST -F file=@filename http://URL/?key=secretpassword&n=3
+
+# function for .bashrc to simplify upload
+function tmpr() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
+</pre>
+
+<center><h2>Privacy and TOS</h2></center>
+<pre id='endpoints' class='prebox'>
+# TODO -- fill in privacy and terms.
+</pre>
+
+<br/>
+<br/>
+{% end %}
+
+{% whitespace single %}

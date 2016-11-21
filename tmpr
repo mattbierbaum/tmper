@@ -14,6 +14,7 @@ import requests
 
 import tornado.web
 import tornado.ioloop
+import tornado.template
 
 try:
     import urlparse
@@ -42,137 +43,14 @@ FAVICON = (
     "ApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
 )
 
-INDEX_CONTENT = \
-string.Template("""
-<link id="favicon" rel="shortcut icon" type="image/png"
- href="data:image/png;base64,$favicon">
-<html>
+subs = {'favicon': FAVICON}
+loader = tornado.template.Loader("./templates")
+PAGE_INDEX = loader.load("index.html").generate(**subs)
+PAGE_CODE = loader.load("code.html").generate(**subs)
+PAGE_HELP = loader.load("help.html").generate(**subs)
+PAGE_DOWNLOAD = loader.load("download.html").generate(**subs)
 
-<head>
-<title>tmpr : file share</title>
-<style media="screen" type="text/css">
-.prebox {
-    width: 640px;
-    margin: auto;
-    background-color: rgba(255, 255, 255, 0.5);
-    padding: 10px;
-}
-
-.inputfile {
-    width: 0.1px;
-    height: 0.1px;
-    opacity: 0;
-    overflow: hidden;
-    position: absolute;
-    z-index: -1;
-    cursor: pointer;
-}
-
-#label {
-    cursor: pointer;
-}
-
-#upload {
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    background-color: rgba(0,0,0,0.4);
-    font-size: 26px;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-}
-
-#num {
-    width: 50px;
-    text-align: center;
-    margin-top: 10px;
-    font-size: 24px;
-    background-color: rgba(0,0,0,0.4);
-    border: none;
-    color: white;
-}
-
-a {
-    text-decoration: none;
-    color: #444444;
-}
-</style>
-</head>
-
-<body style='background:url(data:image/png;base64,$favicon);background-size: 100% auto; margin: 30px;'>
-<center><pre style='font-size:48px;margin:10px;'>TMPR : FILE SHARING</pre></center>
-$content
-</body></html>""")
-
-FORM_CONTENT = """
-<center><a href='/help'><h2>HELP</h2></a></center>
-<br/><center>
-<form enctype="multipart/form-data" action='/' method='post'>
-<input type='file' id='filearg' name='filearg' class='inputfile'/><br/><!-- onchange="javascript:this.form.submit();"/><br/>-->
-<label for='filearg' id='label'><svg width="512" height="512" viewBox="0 0 256 256" style='fill: rgba(0,0,0,0.4);'><g transform="scale(0.25 0.25)"><path d="M576 256l-128-128h-448v832h1024v-704h-448zM512 480l224 224h-160v256h-128v-256h-160l224-224z"></path></g></svg><span></span></label>
-<br/><input id='upload' type='submit' value='Upload'>
-<br/><input type='text' name='n' id='num' value=1>
-</form></center>
-"""
-
-HELP_CONTENT = """
-<center><h2>Introduction</h2></center>
-<pre class='prebox'>
-Temporary file sharing using simple two digit codes (1296 unique). Each file
-can have a max number of downloads and password associated with it, defaults
-are 1 download and no password. Max upload size of 128M.
-
-You can upload and download from the web. After uploading to the main site, you
-will be given a 2 digit code which you may share. A particular code may then be
-downloaded by visiting http://thesite.com/&lt;code&gt;.
-
-To upload and download from command line, we recommend using tmpr as well. This
-can be done by the short commands u, d (see `tmpr --help` for details).
-
-    pip install tmpr
-    tmpr c --url=&lt;some url&gt;       # set the default tmpr url
-    tmpr u /path/to/some/file     # upload file and get 2 digit code
-    tmpr d &lt;code&gt;                 # download the code
-
-You can also start a server of your own using:
-
-    tmpr s --port=&lt;port&gt;
-</pre>
-
-<center><h2>API endpoints</h2></center>
-<pre id='endpoints' class='prebox'>
-GET
-    /               -- this information
-    /CODE?ARGS      -- get a file given by CODE
-
-    ARGS (optional) :
-        key - password associated with the file
-        v - view contents on website rather than raw download
-
-    Examples :
-        curl http://URL/ui
-        curl http://URL/ab?key=supersecretpassword
-        firefox http://URL/7e?v
-
-POST
-    /?ARGS          -- upload a file and receive a name
-    /CODE?ARGS      -- upload file to a particular name
-
-    ARGS (optional) :
-        key -- set a password for a particular file
-        n   -- set number of times a file can be downloaded
-
-    Example :
-        curl -XPOST -F file=@filename http://URL/?key=secretpassword&n=3
-
-# function for .bashrc to simplify upload
-function tmpr() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
-</pre>
-"""
-
-PAGE_INDEX = INDEX_CONTENT.substitute(favicon=FAVICON, content=FORM_CONTENT)
-PAGE_HELP = INDEX_CONTENT.substitute(favicon=FAVICON, content=HELP_CONTENT)
+TMPL_CODE = string.Template(PAGE_CODE)
 
 #=============================================================================
 # The actual web application now
@@ -181,6 +59,7 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/help", HelpHandler),
+            (r"/download", DownloadHandler),
             (r"/([a-z0-9]{2})?", MainHandler)
         ]
         super(Application, self).__init__(handlers, gzip=True)
@@ -188,6 +67,11 @@ class Application(tornado.web.Application):
 class HelpHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(PAGE_HELP)
+        self.finish()
+
+class DownloadHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write(PAGE_DOWNLOAD)
         self.finish()
 
 class MainHandler(tornado.web.RequestHandler):
@@ -318,7 +202,9 @@ class MainHandler(tornado.web.RequestHandler):
 
             # write the file and return the accepted name
             self.save_file(name, body, meta)
-            self.write(name)
+
+            response = TMPL_CODE.substitute(namecode=name)
+            self.write(response)
             self.finish()
             return
 

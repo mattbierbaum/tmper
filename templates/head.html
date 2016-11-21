@@ -1,0 +1,113 @@
+<html><head>
+
+<link id="favicon" rel="shortcut icon" type="image/png"
+    href="data:image/png;base64,{{favicon}}">
+<title>tmpr : file share</title>
+
+<style media="screen" type="text/css">
+body {
+    background: url(data:image/png;base64,{{favicon}});
+    background-size: 100% auto;
+    margin: 0px;
+}
+
+.page {
+    /*background: url(data:image/png;base64,{{favicon}});
+    background-size: 100% auto;*/
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, 0%);
+    max-width: 768px;
+    min-width: 700px;
+    min-height: 100%;
+}
+
+a {
+    text-decoration: none;
+    color: #444444;
+}
+
+.prebox {
+    width: 640px;
+    margin: auto;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 10px;
+}
+
+#header {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    background-color: rgba(0,0,0,0.6);
+}
+
+#header .title {
+    display: block;
+    font-weight: bold;
+}
+
+#header .elm {
+    display: inline-block;
+    font-size: 18;
+    margin: 5px;
+    text-decoration: none;
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#header .elm:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+#header .left {
+    float: left;
+}
+#header .right {
+    float: right;
+}
+
+#footer {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    background-color: rgba(0,0,0,0.6);
+    color: white;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#footer .love {
+    margin: 0px;
+    padding: 3px;
+}
+
+#footer a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+{% block style %}{% end %}
+</style>
+<script type='text/javascript'>
+{% block script %}{% end %}
+</script>
+</head>
+
+<body><div class='page'>
+
+<div id='header'>
+<a href='/'><pre class='title elm left'>TMPR: FILE SHARING</pre></a>
+<a href='https://github.com/mattbierbaum/tmpr'><pre class='elm right'>SOURCE</pre></a>
+<a href='/help'><pre class='elm right'>HELP</pre></a>
+<!--<a href='/download'><pre class='elm right'>DOWNLOAD</pre></a>-->
+</div>
+
+{% block content %}{% end %}
+
+<div id='footer'>
+    <pre class='love'>Made with &lt;3 by <a href='http://runat.me/'>runat.me</a></pre>
+</div>
+</div></body></html>

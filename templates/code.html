@@ -1,0 +1,24 @@
+{% extends "head.html" %}
+
+{% block style %}
+#codeurl {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 256px; 
+    margin: 0;
+    padding: 0;
+}
+{% end %}
+
+{% block script %}
+//window.onload = function(){
+//    elm = document.getElementById('codeurl');
+//    elm.textContent = document.URL + elm.textContent;
+//}
+{% end %}
+
+{% block content %}
+<pre id='codeurl'>$namecode</pre>
+{% end %}
