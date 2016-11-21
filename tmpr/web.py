@@ -2,9 +2,11 @@ from __future__ import print_function
 
 import os
 import json
+import glob
 import base64
 import string
 import random
+import itertools
 
 import tornado.web
 import tornado.ioloop
@@ -29,17 +31,30 @@ FAVICON = (
     "ApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
 )
 
+# decide the template's path, either local of the package global
 index = os.path.exists(os.path.join(os.getcwd(), 'templates', 'index.html'))
 template_dir = './templates' if index else dist.location
 
+# render most of the webpages right now so they are cached
 subs = {'favicon': FAVICON}
 loader = tornado.template.Loader(template_dir)
 PAGE_INDEX = loader.load("index.html").generate(**subs)
 PAGE_CODE = loader.load("code.html").generate(**subs)
 PAGE_HELP = loader.load("help.html").generate(**subs)
+PAGE_ERROR = loader.load("error.html").generate(**subs)
 PAGE_DOWNLOAD = loader.load("download.html").generate(**subs)
 
+# also need to leave a few pages templated, let's use string.Template for ease
 TMPL_CODE = string.Template(PAGE_CODE)
+TMPL_ERROR = string.Template(PAGE_ERROR)
+
+CODE_LEN = 2
+ALL_CODES = None
+USED_CODES = None
+
+# build the regex used by the app to determine if valid URL
+CODE_REGEX = string.Template(r'/([$chars]{$num})?')
+CODE_REGEX = CODE_REGEX.substitute(chars=CHARS, num=CODE_LEN)
 
 #=============================================================================
 # The actual web application now
@@ -49,9 +64,11 @@ class Application(tornado.web.Application):
         handlers = [
             (r"/help", HelpHandler),
             (r"/download", DownloadHandler),
-            (r"/([a-z0-9]{2})?", MainHandler)
+            (CODE_REGEX, MainHandler)
         ]
-        super(Application, self).__init__(handlers, gzip=True)
+        super(Application, self).__init__(
+            handlers, default_handler_class=DefaultHandler, gzip=True
+        )
 
 class HelpHandler(tornado.web.RequestHandler):
     def get(self):
@@ -63,23 +80,28 @@ class DownloadHandler(tornado.web.RequestHandler):
         self.write(PAGE_DOWNLOAD)
         self.finish()
 
+class DefaultHandler(tornado.web.RequestHandler):
+    def prepare(self):
+        # Override prepare() instead of get() to cover all possible HTTP methods.
+        self.set_status(404)
+        self.write(TMPL_ERROR.substitute(error='404'))
+        self.finish()
+
+    def write_error(self, status_code, **kwargs):
+        self.set_status(status_code)
+        self.write(TMPL_ERROR.substitute(error=status_code))
+        self.finish()
+
 class MainHandler(tornado.web.RequestHandler):
     def prepare(self, *args, **kwargs):
         self.request.connection.set_max_body_size(int(1e8))
         super(MainHandler, self).prepare(*args, **kwargs)
 
-    def generate_name(self):
-        return ''.join([random.choice(CHARS) for i in range(2)])
-
     def unique_name(self):
-        tries, out = 0, self.generate_name()
-        while self.exists(out):
-            if tries < len(CHARS)**2:
-                raise Exception
-
-            out = self.generate_name()
-            tries += 1
-        return out
+        avail = list(ALL_CODES.difference(USED_CODES))
+        if len(avail) == 0:
+            return None
+        return random.choice(avail)
 
     def path(self, n):
         return os.path.join(ROOT, n)
@@ -109,7 +131,11 @@ class MainHandler(tornado.web.RequestHandler):
     def error(self, text):
         self.clear()
         self.set_status(404)
-        self.write(text)
+
+        if self.cli():
+            self.write(text)
+        else:
+            self.write(TMPL_ERROR.substitute(error=text))
         self.finish()
 
     def serve_file_headers(self, meta):
@@ -183,6 +209,11 @@ class MainHandler(tornado.web.RequestHandler):
         if len(self.request.files) == 1:
             # we have files attached, save each of them to new file names
             name = args or self.unique_name()
+
+            if name is None:
+                self.error("no codes available")
+                return
+
             fobj = self.request.files.values()[0][0]
 
             # separate the actual contents from the meta data
@@ -198,6 +229,9 @@ class MainHandler(tornado.web.RequestHandler):
             else:
                 self.write(name)
             self.finish()
+
+            global USED_CODES
+            USED_CODES.update([name])
             return
 
         self.error('improper payload')
@@ -208,13 +242,24 @@ class MainHandler(tornado.web.RequestHandler):
         clis = ['curl', 'Wget', 'tmpr']
         return any([i in agent for i in clis])
 
+def used_codes(root):
+    files = glob.glob(os.path.join(root, '??'))
+    return set([
+        os.path.basename(f) for f in files
+    ])
+
 def serve(root=None, port='8888', addr='127.0.0.1'):
-    global ROOT
+    global ROOT, USED_CODES, ALL_CODES
 
     ROOT = root or ROOT
     if not os.path.exists(ROOT):
         os.mkdir(ROOT)
-    
+
+    USED_CODES = used_codes(ROOT)
+    ALL_CODES = set([
+        ''.join(i) for i in itertools.product(*(CHARS,)*CODE_LEN)
+    ])
+
     app = Application()
     app.listen(port, addr)
     tornado.ioloop.IOLoop.instance().start()
