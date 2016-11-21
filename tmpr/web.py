@@ -158,7 +158,7 @@ class MainHandler(tornado.web.RequestHandler):
                 self.save_file(args, data, meta)
 
             # if we are on command line, just return data, otherwise display it pretty
-            if 'curl' in agent or 'Wget' in agent:
+            if self.cli():
                 self.serve_file(data, meta)
             elif 'v' in self.request.arguments.keys():
                 self.write_formatted(data, meta)
@@ -190,12 +190,23 @@ class MainHandler(tornado.web.RequestHandler):
             # write the file and return the accepted name
             self.save_file(name, body, meta)
 
-            response = TMPL_CODE.substitute(namecode=name)
-            self.write(response)
+            if not self.cli():
+                response = TMPL_CODE.substitute(namecode=name)
+                self.write(response)
+            else:
+                self.write(name)
             self.finish()
             return
 
         self.error('improper payload')
+
+    def cli(self):
+        """ Returns true if this URL was visited from the command line """
+        agent = self.request.headers['User-Agent']
+        print(agent)
+        clis = ['curl', 'Wget', 'tmpr']
+        print([i in agent for i in clis])
+        return any([i in agent for i in clis])
 
 def serve(root=None, port='8888', addr='127.0.0.1'):
     global ROOT

@@ -15,6 +15,9 @@ except:
     import urllib.parse as urlparse
     from urllib.parse import urlencode
 
+import pkg_resources
+__version__ = pkg_resources.require("tmpr")[0].version
+
 #=============================================================================
 # command line utility features
 #=============================================================================
