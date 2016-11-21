@@ -13,14 +13,13 @@ import tornado.template
 import pkg_resources
 
 dist = pkg_resources.get_distribution('tmpr')
-#config_file = os.path.join(dist.location, 'production.ini')
 
 #=============================================================================
 # web server functions and data
 #=============================================================================
 # set the root directory for data, by default we should only be working in the
 # current directory where this python file lives
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
+ROOT = os.path.join(os.getcwd(), '.tmpr-files')
 CHARS = string.ascii_lowercase + ''.join(map(str, range(10)))
 
 FAVICON = (
@@ -32,7 +31,7 @@ FAVICON = (
 )
 
 subs = {'favicon': FAVICON}
-loader = tornado.template.Loader(dist.location)#"./templates")
+loader = tornado.template.Loader(dist.location)
 PAGE_INDEX = loader.load("index.html").generate(**subs)
 PAGE_CODE = loader.load("code.html").generate(**subs)
 PAGE_HELP = loader.load("help.html").generate(**subs)

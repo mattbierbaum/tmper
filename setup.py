@@ -32,4 +32,5 @@ setup(name='tmpr',
       platforms='osx, posix, linux, windows',
       description='Temporary file sharing using simple two digit codes.',
       long_description=readme,
+      zip_safe=False,
 )

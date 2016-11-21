@@ -97,7 +97,7 @@ def main():
     p_download.set_defaults(action='download')
     p_upload.set_defaults(action='upload')
 
-    root = os.path.join(os.getcwd(), 'files')
+    root = os.path.join(os.getcwd(), '.tmpr-files')
 
     # custom arguments for server action
     p_serve.add_argument("-a", "--addr", type=str, default='127.0.0.1',
