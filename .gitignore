@@ -2,4 +2,5 @@
 files/*
 build/
 dist/
+tmpr.egg-info/
 MANIFEST

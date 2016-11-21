@@ -1,7 +1,7 @@
-#from setuptools import setup
 import os
 import re
-from distutils.core import setup
+import glob
+from setuptools import setup
 
 def read(filename):
     return open(os.path.join(os.path.dirname(__file__), filename)).read()
@@ -11,6 +11,8 @@ try:
 except IOError as e:
     readme = ''
 
+templates = glob.glob('templates/*')
+
 setup(name='tmpr',
       license='MIT License',
       author='Matt Bierbaum',
@@ -18,7 +20,13 @@ setup(name='tmpr',
       version='0.4.4',
 
       install_requires=["tornado>=4.3"],
-      scripts=['tmpr'],
+      packages=['tmpr'],
+      entry_points={
+        'console_scripts': [
+            'tmpr = tmpr.__main__:main'
+        ]
+      },
+      data_files=[('', templates)],
       package_data={'': ['README.md']},
 
       platforms='osx, posix, linux, windows',
