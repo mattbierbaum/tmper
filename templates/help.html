@@ -1,12 +1,14 @@
 {% extends "head.html" %}
 
-{% block style %}
+{% block head %}
+<style media="screen" type="text/css">
 .prebox {
     width: 640px;
     margin: auto;
     background-color: rgba(255, 255, 255, 0.62);
     padding: 10px;
 }
+</style>
 {% end %}
 
 {% block content %}
@@ -69,6 +71,7 @@ function tmpr() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
 <center><h2>Privacy and TOS</h2></center>
 <pre id='endpoints' class='prebox'>
 # TODO -- fill in privacy and terms.
+test
 </pre>
 
 <br/>

@@ -1,6 +1,7 @@
 {% extends "head.html" %}
 
-{% block style %}
+{% block head %}
+<style media="screen" type="text/css">
 .inputfile {
     width: 0.1px;
     height: 0.1px;
@@ -9,6 +10,13 @@
     position: absolute;
     z-index: -1;
     cursor: pointer;
+}
+
+.content {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
 }
 
 #folder {
@@ -60,10 +68,8 @@
     color: white;
     margin: 0;
 }
+</style>
 
-{% end %}
-
-{% block content %}
 <script type='text/javascript'>
 window.onload = function() {
     elm = document.getElementById('filearg');
@@ -79,18 +85,28 @@ window.onload = function() {
     fld.ondrop = yhl;
 }
 </script>
-<br/>
+{% end %}
 
+{% block content %}
+<br/>
+<div class='content'>
 <center>
 <form enctype="multipart/form-data" action='/' method='post'>
-<input type='file' id='filearg' name='filearg' class='inputfile'/><br/><!-- onchange="javascript:this.form.submit();"/><br/>-->
-<label for='filearg' ><svg id='folder' width="512" height="416" viewBox="0 0 256 256"><g transform="scale(0.25 0.25)"><path d="M576 256l-128-128h-448v832h1024v-704h-448zM512 480l224 224h-160v256h-128v-256h-160l224-224z"></path></g></svg><span></span></label>
-<br/><input id='upload' type='submit' value='Upload'>
-<br/>
-<div id='backer'>
-<label for='n' id='countlbl'>COUNT: </label>
-<input type='text' name='n' id='num' value=1>
-</div>
+    <input type='file' id='filearg' name='filearg' class='inputfile'/><br/><!-- onchange="javascript:this.form.submit();"/><br/>-->
+    <label for='filearg'>
+        <svg id='folder' width="512" height="416" viewBox="0 0 256 256">
+        <g transform="scale(0.25 0.25)">
+            <path d="M576 256l-128-128h-448v832h1024v-704h-448zM512 480l224 224h-160v256h-128v-256h-160l224-224z"></path>
+        </g>
+    </svg><span></span>
+    </label>
+    <br/><input id='upload' type='submit' value='Upload'>
+    <br/>
+    <div id='backer'>
+        <label for='n' id='countlbl'>COUNT: </label>
+        <input type='text' name='n' id='num' value=1>
+    </div>
 </form>
 </center>
+</div>
 {% end %}

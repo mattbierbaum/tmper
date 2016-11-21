@@ -1,6 +1,7 @@
 {% extends "head.html" %}
 
-{% block style %}
+{% block head %}
+<style media="screen" type="text/css">
 #codeurl {
     position: absolute;
     top: 50%;
@@ -10,13 +11,14 @@
     margin: 0;
     padding: 0;
 }
-{% end %}
+</style>
 
-{% block script %}
+<script type='text/javascript'>
 //window.onload = function(){
 //    elm = document.getElementById('codeurl');
 //    elm.textContent = document.URL + elm.textContent;
 //}
+</script>
 {% end %}
 
 {% block content %}
