@@ -11,7 +11,6 @@ import tornado.ioloop
 import tornado.template
 
 import pkg_resources
-
 dist = pkg_resources.get_distribution('tmpr')
 
 #=============================================================================
@@ -30,8 +29,11 @@ FAVICON = (
     "ApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
 )
 
+index = os.path.exists(os.path.join(os.getcwd(), 'templates', 'index.html'))
+template_dir = './templates' if index else dist.location
+
 subs = {'favicon': FAVICON}
-loader = tornado.template.Loader(dist.location)
+loader = tornado.template.Loader(template_dir)
 PAGE_INDEX = loader.load("index.html").generate(**subs)
 PAGE_CODE = loader.load("code.html").generate(**subs)
 PAGE_HELP = loader.load("help.html").generate(**subs)
@@ -203,9 +205,7 @@ class MainHandler(tornado.web.RequestHandler):
     def cli(self):
         """ Returns true if this URL was visited from the command line """
         agent = self.request.headers['User-Agent']
-        print(agent)
         clis = ['curl', 'Wget', 'tmpr']
-        print([i in agent for i in clis])
         return any([i in agent for i in clis])
 
 def serve(root=None, port='8888', addr='127.0.0.1'):
