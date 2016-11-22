@@ -12,7 +12,17 @@
     cursor: pointer;
 }
 
-.content {
+.pulse {
+    animation-name: pulser;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+@keyframes pulser {
+    0%, 100% {opacity: 0.1;}
+    50% {opacity: 1.0;}
+}
+
+#content {
     top: 50%;
     left: 50%;
     position: absolute;
@@ -29,6 +39,9 @@
     transition: fill 0.5s ease;
     fill: rgba(0,0,0,0.6);
 }
+
+.drag {fill: rgba(0,0,0,0.6);}
+.hidden {display: none !important;}
 
 #upload {
     text-decoration: none;
@@ -69,31 +82,101 @@
     color: white;
     margin: 0;
 }
+
+#codeurl {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 256px; 
+    margin: 0;
+    padding: 0;
+}
 </style>
 
 <script type='text/javascript'>
-window.onload = function() {
-    elm = document.getElementById('filearg');
-    fld = document.getElementById('folder');
+var tests, fld, lbl;
+var busy = false;
 
-    function nodefault(e){
-        e.preventDefault();
-        e.stopPropagation();
+function setlbl(val) {lbl.value = lbl.innerHTML = val;}
+
+window.onload = function(){
+    bdy = document.body;
+    fld = document.getElementById('folder');
+    lbl = document.getElementById('codeurl');
+
+    tests = {
+        filereader: typeof FileReader != 'undefined',
+        dnd: 'draggable' in document.createElement('span'),
+        formdata: !!window.FormData,
+        progress: "upload" in new XMLHttpRequest
+    }; 
+
+    if (tests.dnd) { 
+        bdy.ondragover = function() {if (!busy) {fld.classList = ['drag'];} return false;};
+        bdy.ondragend = function() {if (!busy) {fld.classList = [''];} return false;};
+        bdy.ondrop = function(e) {
+            e.preventDefault();
+            readfiles(e.dataTransfer.files);
+        }
     }
-    yhl = function(e) { nodefault(e); fld.classList.add('drag-hl'); }
-    nhl = function(e) { nodefault(e); fld.classList.remove('drag-hl'); }
-    fld.ondragenter = yhl;
-    fld.ondrop = yhl;
+
+    document.getElementById('filearg').onchange = function(){readfiles(this.files);};
+}
+
+function readfiles(files) {
+    if (files.length == 0 || busy)
+        return;
+
+    var formData = tests.formdata ? new FormData() : null;
+    for (var i=0; i<files.length; i++) {
+        if (tests.formdata)
+            formData.append('file', files[i]);
+    }
+
+    if (tests.formdata) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                document.getElementById('content').className = 'hidden';
+                setlbl(xhr.responseText);
+                lbl.className = 'border';
+                busy = false;
+            }
+            if (xhr.readyState == XMLHttpRequest.OPENED) {
+                document.getElementById('content').className = '';
+                document.getElementById('upload').className = 'hidden';
+                document.getElementById('backer').className = 'hidden';
+                fld.classList = ['pulse'];
+                lbl.className = '';
+                setlbl('0%');
+                busy = true;
+            }
+        }
+
+        if (tests.progress) {
+            xhr.upload.onprogress = function (event) {
+                if (event.lengthComputable) {
+                    var complete = Math.floor(100*(event.loaded / event.total));
+                    setlbl(complete+'%');
+                }
+            }
+        }
+
+        xhr.open('POST', '/?codeonly=true');
+        xhr.send(formData);
+    }
 }
 </script>
 {% end %}
 
 {% block content %}
 <br/>
-<div class='content'>
+<div id='content' class=''>
 <center>
-<form enctype="multipart/form-data" action='/' method='post'>
-    <input type='file' id='filearg' name='filearg' class='inputfile'/><br/><!-- onchange="javascript:this.form.submit();"/><br/>-->
+<form enctype="multipart/form-data" action='/' method='post' id='form'>
+    <input type='file' id='filearg' name='filearg' class='inputfile'/><br/>
     <label for='filearg'>
         <svg id='folder' width="512" height="512" viewBox="0 0 256 256">
         <g transform="scale(0.25 0.25)">
@@ -110,4 +193,5 @@ window.onload = function() {
 </form>
 </center>
 </div>
+<pre id='codeurl' class='hidden'></pre>
 {% end %}

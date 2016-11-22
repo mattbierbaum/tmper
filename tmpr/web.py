@@ -198,6 +198,7 @@ class MainHandler(tornado.web.RequestHandler):
 
     def post(self, args):
         meta = {}
+        codeonly = self.request.arguments.get('codeonly', [None])[0]
         meta['key'] = self.request.arguments.get('key', [None])[0]
         usern = int(self.request.arguments.get('n', [1])[0])
         usern = max(min(usern, MAX_DOWNLOADS), 0)
@@ -225,7 +226,7 @@ class MainHandler(tornado.web.RequestHandler):
             # write the file and return the accepted name
             self.save_file(name, body, meta)
 
-            if not self.cli():
+            if not self.cli() and not codeonly:
                 response = TMPL_CODE.substitute(namecode=name)
                 self.write(response)
             else:
