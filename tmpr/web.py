@@ -166,6 +166,7 @@ class MainHandler(tornado.web.RequestHandler):
 
         if not args:
             self.write(PAGE_INDEX)
+            #self.write(TMPL_CODE.substitute(namecode='aa'))
             self.finish()
         else:
             if not self.exists(args):

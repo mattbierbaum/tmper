@@ -22,15 +22,13 @@ body {
 }
 
 #page {
+    position: relative;
     background: url(data:image/png;base64,{{favicon}});
     background-size: 100% auto;
-    left: 50%;
-    position: absolute;
-    transform: translate(-50%, 0%);
+    margin: 0 auto;
     min-width: 720px;
     max-width: 960px;
     min-height: 100%;
-    width: 100%;
 }
 
 a {
@@ -39,11 +37,11 @@ a {
 }
 
 #header {
-    position: absolute;
+    position: relative;
     top: 0px;
-    left: 0px;
     width: 100%;
     background-color: rgba(0,0,0,0.6);
+    overflow: hidden;
 }
 
 #header .title {
@@ -55,10 +53,13 @@ a {
     display: inline-block;
     font-size: 18;
     margin: 5px;
-    text-decoration: none;
     color: white;
     padding-left: 10px;
     padding-right: 10px;
+
+    text-decoration: none;
+    font-family: monospace;
+    white-space: pre;
 }
 
 #header .elm:hover {
@@ -73,7 +74,7 @@ a {
 }
 
 #footer {
-    position: fixed;
+    position: absolute;
     left: 0px;
     bottom: 0px;
     width: 100%;
@@ -106,17 +107,15 @@ a {
 <body>
 <div id='bkg'></div>
 <div id='page'>
-
-<div id='header'>
-<a href='/'><pre class='title elm left'>TMPR: FILE SHARING</pre></a>
-<a href='https://github.com/mattbierbaum/tmpr'><pre class='elm right'>SOURCE</pre></a>
-<a href='/help'><pre class='elm right'>HELP</pre></a>
-<!--<a href='/download'><pre class='elm right'>DOWNLOAD</pre></a>-->
-</div>
-
-{% block content %}{% end %}
-
-<div id='footer'>
-    <pre class='love'>Made with &lt;3 by <a href='http://runat.me/'>runat.me</a></pre>
-</div>
+    <div id='header'>
+        <a href='/' class='title elm left'>TMPR: FILE SHARING</a>
+        <a href='https://github.com/mattbierbaum/tmpr' class='elm right'>SOURCE</a>
+        <a href='/help' class='elm right'>HELP</a>
+    </div>
+    
+    {% block content %}{% end %}
+    
+    <div id='footer'>
+        <pre class='love'>Made with &lt;3 by <a href='http://runat.me/'>runat.me</a></pre>
+    </div>
 </div></body></html>

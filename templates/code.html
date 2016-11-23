@@ -6,7 +6,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: perspective(1px) translate(-50%, -50%);
     font-size: 256px; 
     margin: 0;
     padding: 0;
@@ -15,5 +15,5 @@
 {% end %}
 
 {% block content %}
-<span><pre id='codeurl' class='border'>$namecode</pre></span>
+<pre id='codeurl' class='border'>$namecode</pre>
 {% end %}
