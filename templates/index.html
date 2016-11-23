@@ -100,19 +100,31 @@
     margin: 0;
     padding: 0;
 }
+
+#percent {
+    font-size: 256px;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 </style>
 
 <script type='text/javascript'>
-var tests, fld, lbl;
+var tests, fld, lbl, cod;
 var busy = false;
 var autosubmit = true;
 
 function setlbl(val) {lbl.value = lbl.innerHTML = val;}
+function setcode(val) {cod.value = cod.innerHTML = val;}
 
 window.onload = function(){
     bdy = document.body;
     fld = document.getElementById('folder');
-    lbl = document.getElementById('codeurl');
+    cod = document.getElementById('codeurl');
+    lbl = document.getElementById('percent');
     frm = document.getElementById('filearg');
 
     tests = {
@@ -158,17 +170,21 @@ function readfiles() {
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 document.getElementById('form').className = 'hidden';
-                setlbl(xhr.responseText);
-                lbl.className = 'border';
+                document.getElementById('buttons').className = '';
+                setcode(xhr.responseText);
+                cod.className = 'border';
+                lbl.className = 'hidden';
                 busy = false;
             }
             if (xhr.readyState == XMLHttpRequest.OPENED) {
                 document.getElementById('form').className = '';
                 document.getElementById('buttons').className = 'hidden';
                 fld.classList = ['pulse'];
+                cod.className = 'hidden';
                 lbl.className = '';
                 setlbl('0%');
                 busy = true;
+                debugger;
             }
         }
 
@@ -196,6 +212,7 @@ function readfiles() {
     <label for='filearg'>
         <svg id='folder' width='512' height='420' viewBox='0 4 32 26'>
             <path d="M18 8l-4-4h-14v26h32v-22h-14zM16 15l7 7h-5v8h-4v-8h-5l7-7z"/>
+            <pre id='percent' class='hidden'></pre>
         </svg>
     <span></span>
     </label>
