@@ -12,19 +12,17 @@ body {
 #bkg {
     background: url(data:image/png;base64,{{favicon}});
     background-size: 100% auto;
-    filter: brightness(0.6);
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0px;
-    left: 0px;
-    z-index: -1;
+    /*filter: brightness(0.6);*/
 }
 
 #page {
-    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    filter: none;
     background: url(data:image/png;base64,{{favicon}});
     background-size: 100% auto;
+    /*filter: brightness(1.0) !important;*/
     margin: 0 auto;
     min-width: 720px;
     max-width: 960px;
@@ -37,9 +35,8 @@ a {
 }
 
 #header {
-    position: relative;
-    top: 0px;
-    width: 100%;
+    margin-bottom: 20px;
+    height: 35px;
     background-color: rgba(0,0,0,0.6);
     overflow: hidden;
 }
@@ -74,10 +71,7 @@ a {
 }
 
 #footer {
-    position: absolute;
-    left: 0px;
-    bottom: 0px;
-    width: 100%;
+    bottom: 0;
     background-color: rgba(0,0,0,0.6);
     color: white;
     text-align: center;
@@ -105,7 +99,7 @@ a {
 </head>
 
 <body>
-<div id='bkg'></div>
+<div id='bkg'>
 <div id='page'>
     <div id='header'>
         <a href='/' class='title elm left'>TMPR: FILE SHARING</a>
@@ -118,4 +112,5 @@ a {
     <div id='footer'>
         <pre class='love'>Made with &lt;3 by <a href='http://runat.me/'>runat.me</a></pre>
     </div>
-</div></body></html>
+</div></div>
+</body></html>

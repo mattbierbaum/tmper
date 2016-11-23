@@ -23,10 +23,11 @@
 }
 
 #content {
-    top: 50%;
-    left: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    /*min-height: 546px;*/
 }
 
 #folder {
@@ -43,51 +44,58 @@
 .drag {fill: rgba(0,0,0,0.6);}
 .hidden {display: none !important;}
 
+#buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: rgba(0,0,0,0.4);
+    padding: 7px;
+}
+
 #upload {
     text-decoration: none;
     text-align: center;
     cursor: pointer;
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(255, 255, 255, 0.2);
     font-size: 26px;
-    border: none;
+    border: solid;
+    border-color: white;
+    border-width: 2px;
     color: white;
     padding: 10px 20px;
 }
 
-#backer {
-    display: inline-block;
-    background-color: rgba(0,0,0,0.4);
-    margin-top: 10px;
+.backer {
+    background-color: rgba(0,0,0,0.0);
+    margin-top: 0px;
 }
 
-#countlbl {
+.formlbl {
     color: white;
     font-weight: bold;
     font-size: 18px;
     padding-left: 12px;
+    padding-right: 6px;
     text-align: center;
-    height: 45px;
+    height: 61px;
     line-height: 45px;
 }
 
-#num {
-    transform: translate(0, 2px);
-    padding: 0;
-    height: 45px;
-    width: 45px;
+.textinput {
+    height: 55px;
     text-align: center;
     font-size: 24px;
     background-color: rgba(0,0,0,0.0);
-    border: none;
+    border: solid;
+    border-color: rgba(255, 255, 255, 0.6);
+    border-width: 2px;
     color: white;
-    margin: 0;
 }
 
+#num {width: 45px;}
+#key {width: 100px;}
+
 #codeurl {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     font-size: 256px; 
     margin: 0;
     padding: 0;
@@ -97,6 +105,7 @@
 <script type='text/javascript'>
 var tests, fld, lbl;
 var busy = false;
+var autosubmit = true;
 
 function setlbl(val) {lbl.value = lbl.innerHTML = val;}
 
@@ -104,6 +113,7 @@ window.onload = function(){
     bdy = document.body;
     fld = document.getElementById('folder');
     lbl = document.getElementById('codeurl');
+    frm = document.getElementById('filearg');
 
     tests = {
         filereader: typeof FileReader != 'undefined',
@@ -117,14 +127,22 @@ window.onload = function(){
         bdy.ondragend = function() {if (!busy) {fld.classList = [''];} return false;};
         bdy.ondrop = function(e) {
             e.preventDefault();
-            readfiles(e.dataTransfer.files);
+            frm.files = e.dataTransfer.files;
+
+            if (autosubmit) readfiles();
         }
     }
 
-    document.getElementById('filearg').onchange = function(){readfiles(this.files);};
+    if (autosubmit) {
+        func = function() {readfiles();};
+        document.getElementById('upload').onclick = func;
+        document.getElementById('filearg').onchange = func;
+    }
 }
 
-function readfiles(files) {
+function readfiles() {
+    files = document.getElementById('filearg').files;
+
     if (files.length == 0 || busy)
         return;
 
@@ -139,15 +157,14 @@ function readfiles(files) {
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                document.getElementById('content').className = 'hidden';
+                document.getElementById('form').className = 'hidden';
                 setlbl(xhr.responseText);
                 lbl.className = 'border';
                 busy = false;
             }
             if (xhr.readyState == XMLHttpRequest.OPENED) {
-                document.getElementById('content').className = '';
-                document.getElementById('upload').className = 'hidden';
-                document.getElementById('backer').className = 'hidden';
+                document.getElementById('form').className = '';
+                document.getElementById('buttons').className = 'hidden';
                 fld.classList = ['pulse'];
                 lbl.className = '';
                 setlbl('0%');
@@ -174,24 +191,29 @@ function readfiles(files) {
 {% block content %}
 <br/>
 <div id='content' class=''>
-<center>
 <form enctype="multipart/form-data" action='/' method='post' id='form'>
     <input type='file' id='filearg' name='filearg' class='inputfile'/><br/>
     <label for='filearg'>
-        <svg id='folder' width="512" height="512" viewBox="0 0 256 256">
-        <g transform="scale(0.25 0.25)">
-            <path d="M576 256l-128-128h-448v832h1024v-704h-448zM512 480l224 224h-160v256h-128v-256h-160l224-224z"></path>
-        </g>
-    </svg><span></span>
+        <svg id='folder' width='512' height='420' viewBox='0 4 32 26'>
+            <path d="M18 8l-4-4h-14v26h32v-22h-14zM16 15l7 7h-5v8h-4v-8h-5l7-7z"/>
+        </svg>
+    <span></span>
     </label>
-    <br/><input id='upload' type='submit' value='Upload'>
     <br/>
-    <div id='backer'>
-        <label for='n' id='countlbl'>COUNT: </label>
-        <input type='text' name='n' id='num' value=1>
+    <div id='buttons'>
+        <input id='upload' type='submit' value='Upload'>
+        <div class='backer'>
+            <label for='n' class='formlbl'>COUNT: </label>
+            <input type='text' name='n' id='num' class='textinput' value=1>
+        </div>
+        <div class='backer'>
+            <label for='key' class='formlbl'>KEY: </label>
+            <input type='password' name='key' id='key' class='textinput' value=>
+        </div>
     </div>
 </form>
-</center>
-</div>
 <pre id='codeurl' class='hidden'></pre>
+</div>
 {% end %}
+
+

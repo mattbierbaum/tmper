@@ -3,17 +3,21 @@
 {% block head %}
 <style media="screen" type="text/css">
 #codeurl {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: perspective(1px) translate(-50%, -50%);
     font-size: 256px; 
     margin: 0;
     padding: 0;
+}
+
+.wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    min-height: 266px;
 }
 </style>
 {% end %}
 
 {% block content %}
-<pre id='codeurl' class='border'>$namecode</pre>
+<div class='wrap'><pre id='codeurl' class='border'>$namecode</pre></div>
 {% end %}
