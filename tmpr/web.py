@@ -15,6 +15,9 @@ import tornado.template
 import pkg_resources
 dist = pkg_resources.get_distribution('tmpr')
 
+def b64read(path, name):
+    return base64.b64encode(open(os.path.join(path, name)).read())
+
 #=============================================================================
 # web server functions and data
 #=============================================================================
@@ -23,20 +26,15 @@ dist = pkg_resources.get_distribution('tmpr')
 ROOT = os.path.join(os.getcwd(), '.tmpr-files')
 CHARS = string.ascii_lowercase + ''.join(map(str, range(10)))
 
-FAVICON = (
-    "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAGBQT"
-    "FRFooKnN8jxY5PVM7vvM7zwY5LUN8fxo4KnhInAuX2Py3172oZtSZ/k5ZJjOa7s6pxbP9LyTN"
-    "jy66VYVtryo4Vmqoxo57Fit5djvp1lw6Jnzaps17Fu3bNt47Rp6a1csZJmx8KbeAAAAEJJREF"
-    "UOMtjEBGVl5cXl5CUkpaRlRWTkxPi5+Xm4mTgYOXhY2YTEBRmGNEK2EcVEKuAiRgFjFRXIEOq"
-    "ApZRBSQoAAAJHkuVEmG+EwAAAABJRU5ErkJggg=="
-)
-
 # decide the template's path, either local of the package global
 index = os.path.exists(os.path.join(os.getcwd(), 'templates', 'index.html'))
 template_dir = './templates' if index else dist.location
 
+FAVICON = b64read(template_dir, 'favicon.png')
+FAVICON2 = b64read(template_dir, 'favicon2.png')
+
 # render most of the webpages right now so they are cached
-subs = {'favicon': FAVICON}
+subs = {'favicon': FAVICON, 'favicon2': FAVICON2}
 loader = tornado.template.Loader(template_dir)
 PAGE_INDEX = loader.load("index.html").generate(**subs)
 PAGE_CODE = loader.load("code.html").generate(**subs)

@@ -27,17 +27,17 @@
     justify-content: center;
     align-items: center;
     flex: 1;
-    /*min-height: 546px;*/
+    min-height: 546px;
 }
 
 #folder {
     cursor: pointer;
     fill: rgba(0,0,0,0.4);
-    transition: fill 0.5s ease;
+    transition: fill 0.25s ease;
 }
 
 #folder:hover {
-    transition: fill 0.5s ease;
+    transition: fill 0.25s ease;
     fill: rgba(0,0,0,0.6);
 }
 
@@ -56,6 +56,7 @@
     text-decoration: none;
     text-align: center;
     cursor: pointer;
+    transition: background-color 0.25s ease;
     background-color: rgba(255, 255, 255, 0.2);
     font-size: 26px;
     border: solid;
@@ -63,6 +64,11 @@
     border-width: 2px;
     color: white;
     padding: 10px 20px;
+}
+
+#upload:hover {
+    transition: background-color 0.25s ease;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .backer {

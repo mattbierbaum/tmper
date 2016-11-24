@@ -14,7 +14,6 @@
 {% block content %}
 {% whitespace all %}
 
-<br/>
 <center><h2>Introduction</h2></center>
 <pre class='prebox'>
 TMPR provides temporary file sharing using simple two digit codes (1296
@@ -69,15 +68,25 @@ POST
 function tmpr() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
 </pre>
 
-<!--<center><h2>Privacy and TOS</h2></center>
+<center><h2>Privacy and terms (ish)</h2></center>
 <pre id='endpoints' class='prebox'>
-# TODO -- fill in privacy and terms.
-test
-</pre>-->
+In simple terms, we guarantee nothing about your interaction with this site and
+are not liable for anything that may happen to you, your belongings,
+intellectual property, etc due to your use of it. We will attempt to make your
+files available to others under the constraints which you ask (lifetime, number
+of downloads permitted, password protection) but again cannot make any
+guarantees.
 
-<br/>
-<br/>
-<br/>
+We do not use cookies or record statistics about the usage of this website
+aside from the time, file type, and file size of each upload. We delete all
+other metadata associated with each file upload. We do not track your visit
+aside from server logs, which are purged periodically. We may look at these
+logs to ensure the health of the site in a hostile internet environment.
+These statements may be checked by viewing the source code, which is available
+under the MIT license -- this code is directly run on a VPS for convenience to
+users.
+</pre>
+
 {% end %}
 
 {% whitespace single %}
