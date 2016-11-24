@@ -92,6 +92,63 @@ a {
     border-width: 5px;
     background-color: white;
 }
+
+#buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: rgba(0,0,0,0.4);
+    padding: 7px;
+}
+
+#button {
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+    background-color: rgba(255, 255, 255, 0.2);
+    font-size: 26px;
+    border: solid;
+    border-color: white;
+    border-width: 2px;
+    color: white;
+    padding: 10px 20px;
+}
+
+#upload:hover {
+    transition: background-color 0.25s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.backer {
+    background-color: rgba(0,0,0,0.0);
+    margin-top: 0px;
+}
+
+.formlbl {
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    padding-left: 12px;
+    padding-right: 6px;
+    text-align: center;
+    height: 61px;
+    line-height: 45px;
+}
+
+.textinput {
+    height: 55px;
+    text-align: center;
+    font-size: 24px;
+    background-color: rgba(0,0,0,0.0);
+    border: solid;
+    border-color: rgba(255, 255, 255, 0.6);
+    border-width: 2px;
+    color: white;
+}
+
+#num {width: 45px;}
+#key {width: 100px;}
 </style>
 {% block head %}{% end %}
 </head>
@@ -103,6 +160,7 @@ a {
         <a href='/' class='title elm left'>TMPR: FILE SHARING</a>
         <a href='https://github.com/mattbierbaum/tmpr' class='elm right'>SOURCE</a>
         <a href='/help' class='elm right'>HELP</a>
+        <a href='/download' class='elm right'>DOWNLOAD</a>
     </div>
     
     {% block content %}{% end %}

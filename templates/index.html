@@ -44,63 +44,6 @@
 .drag {fill: rgba(0,0,0,0.6);}
 .hidden {display: none !important;}
 
-#buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    background-color: rgba(0,0,0,0.4);
-    padding: 7px;
-}
-
-#upload {
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.25s ease;
-    background-color: rgba(255, 255, 255, 0.2);
-    font-size: 26px;
-    border: solid;
-    border-color: white;
-    border-width: 2px;
-    color: white;
-    padding: 10px 20px;
-}
-
-#upload:hover {
-    transition: background-color 0.25s ease;
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.backer {
-    background-color: rgba(0,0,0,0.0);
-    margin-top: 0px;
-}
-
-.formlbl {
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-    padding-left: 12px;
-    padding-right: 6px;
-    text-align: center;
-    height: 61px;
-    line-height: 45px;
-}
-
-.textinput {
-    height: 55px;
-    text-align: center;
-    font-size: 24px;
-    background-color: rgba(0,0,0,0.0);
-    border: solid;
-    border-color: rgba(255, 255, 255, 0.6);
-    border-width: 2px;
-    color: white;
-}
-
-#num {width: 45px;}
-#key {width: 100px;}
-
 #codeurl {
     font-size: 256px; 
     margin: 0;
@@ -153,8 +96,9 @@ window.onload = function(){
 
     if (autosubmit) {
         func = function() {readfiles();};
-        document.getElementById('upload').onclick = func;
+        document.getElementById('button').onclick = func;
         document.getElementById('filearg').onchange = func;
+        document.getElementById('button').className = 'hidden';
     }
 }
 
@@ -190,7 +134,6 @@ function readfiles() {
                 lbl.className = '';
                 setlbl('0%');
                 busy = true;
-                debugger;
             }
         }
 
@@ -224,7 +167,7 @@ function readfiles() {
     </label>
     <br/>
     <div id='buttons'>
-        <input id='upload' type='submit' value='Upload'>
+        <input id='button' type='submit' value='Upload'>
         <div class='backer'>
             <label for='n' class='formlbl'>COUNT: </label>
             <input type='text' name='n' id='num' class='textinput' value=1>

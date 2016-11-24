@@ -1,8 +1,43 @@
-<script type='text/javascript'>
-window.onload = function(){
-    elm = document.getElementById('codeurl');
-    elm.textContent = document.URL + elm.textContent;
-}
-</script>
-<pre id='codeurl' class='title code'>$namecode</pre>
+{% extends 'head.html' %}
+{% block head %}
 
+<style media="screen" type="text/css">
+#dl {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    min-height: 266px;
+    flex-direction: column;
+}
+
+#codeurl {
+    font-size: 256px; 
+    margin: 0;
+    padding: 0;
+    font-family: monospace;
+    white-space: pre;
+
+    height: 266px;
+    width: 340px;
+    text-align: center;
+}
+</style>
+{% end %}
+
+{% block content %}
+<div id='dl'>
+
+<form enctype="multipart/form-data" action='/' method='get' id='form'>
+    <input type='text' name='code' id='codeurl' class='border' maxlength='2'/>
+    <div id='buttons'>
+        <input id='button' type='submit' value='Download'>
+        <div class='backer'>
+            <label for='key' class='formlbl'>KEY: </label>
+            <input type='password' name='key' id='key' class='textinput' value=>
+        </div>
+    </div>
+</form>
+
+</div>
+{% end %}

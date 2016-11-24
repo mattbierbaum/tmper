@@ -161,10 +161,11 @@ class MainHandler(tornado.web.RequestHandler):
 
     def get(self, args):
         agent = self.request.headers['User-Agent']
+        if not args:
+            args = self.request.arguments.get('code', [''])[0]
 
         if not args:
             self.write(PAGE_INDEX)
-            #self.write(TMPL_CODE.substitute(namecode='aa'))
             self.finish()
         else:
             if not self.exists(args):
