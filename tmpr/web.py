@@ -233,8 +233,10 @@ class MainHandler(tornado.web.RequestHandler):
         self.finish()
 
     def serve_file_headers(self, meta):
-        self.set_header('Content-Type', meta['content_type'])
-        self.set_header('Content-Disposition', 'attachment; filename='+meta['filename'])
+        self.set_header('Content-Type', 'application/octet-stream')
+        self.set_header(
+            'Content-Disposition', 'attachment; filename="{}"'.format(meta['filename'])
+        )
 
     def serve_file(self, data, meta):
         self.serve_file_headers(meta)
