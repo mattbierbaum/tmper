@@ -76,7 +76,6 @@ var tests, fld, lbl, cod;
 var busy = false;
 var autosubmit = true;
 var dosimplify = true;
-
 var simple = false;
 
 function setlbl(val) {lbl.value = lbl.innerHTML = val;}
@@ -121,18 +120,24 @@ window.onload = function(){
             document.getElementById('opt-time').className = 'backer';
             document.getElementById('opt-expand').className = 'backer2';
             document.getElementById('lbl-key').innerText = 'P/W:';
-            document.getElementById('lbl-expand').innerHTML = '&gt;'
+            document.getElementById('lbl-expand').innerHTML = '&gt;';
+            document.cookie = 'false'
         } else {
             simple = true;
             document.getElementById('opt-n').className = 'backer hidden';
             document.getElementById('opt-time').className = 'backer hidden';
             document.getElementById('opt-expand').className = 'backer2';
             document.getElementById('lbl-key').innerText = 'PASSWORD:';
-            document.getElementById('lbl-expand').innerHTML = '&lt;'
+            document.getElementById('lbl-expand').innerHTML = '&lt;';
+            document.cookie = 'true'
         }
     }
     document.getElementById('opt-expand').onclick = switcher;
+    document.getElementById('opt-expand').className = 'backer2';
 
+    cookie = document.cookie;
+    if (cookie == 'true') dosimplify = true;
+    if (cookie == 'false') dosimplify = false;
     if (dosimplify) {
         switcher();
     }
@@ -227,7 +232,7 @@ function readfiles() {
         </div>
     </div>
     <div id='opt-expand' class='backer2 hidden'>
-        <label class='formlbl2' id='lbl-expand'>&lt;</label>
+        <label class='formlbl2' id='lbl-expand'>&gt;</label>
     </div>
     </div>
 </form>
