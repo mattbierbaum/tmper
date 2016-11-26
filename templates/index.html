@@ -25,6 +25,7 @@
 #content {
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     flex: 1;
     min-height: 546px;
@@ -159,10 +160,12 @@ function readfiles() {
 <form enctype="multipart/form-data" action='/' method='post' id='form'>
     <input type='file' id='filearg' name='filearg' class='inputfile'/><br/>
     <label for='filearg'>
+        <center>
         <svg id='folder' width='512' height='420' viewBox='0 4 32 26'>
             <path d="M18 8l-4-4h-14v26h32v-22h-14zM16 15l7 7h-5v8h-4v-8h-5l7-7z"/>
             <pre id='percent' class='hidden'></pre>
         </svg>
+        </center>
     <span></span>
     </label>
     <br/>
@@ -170,7 +173,11 @@ function readfiles() {
         <input id='button' type='submit' value='Upload'>
         <div class='backer'>
             <label for='n' class='formlbl'>COUNT: </label>
-            <input type='text' name='n' id='num' class='textinput' value=1>
+            <input type='number' name='n' id='num' class='textinput' value=1 min=1 max=5>
+        </div>
+        <div class='backer'>
+            <label for='time' class='formlbl'>TIME: </label>
+            <input type='text' name='time' id='time' class='textinput' value='3 days'>
         </div>
         <div class='backer'>
             <label for='key' class='formlbl'>KEY: </label>

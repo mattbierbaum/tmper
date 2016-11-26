@@ -1,6 +1,5 @@
 {% extends 'head.html' %}
 {% block head %}
-
 <style media="screen" type="text/css">
 #dl {
     display: flex;
@@ -23,12 +22,18 @@
     text-align: center;
 }
 </style>
+<script type='text/javascript'>
+function submit(){
+    butt = document.getElementById('button');
+
+}
+</script>
 {% end %}
 
 {% block content %}
 <div id='dl'>
 
-<form enctype="multipart/form-data" action='/' method='get' id='form'>
+<form enctype="multipart/form-data" action='/' method='get' id='form' onsubmit='return submit();'>
     <input type='text' name='code' id='codeurl' class='border' maxlength='2'/>
     <div id='buttons'>
         <input id='button' type='submit' value='Download'>

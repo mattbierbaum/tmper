@@ -7,6 +7,8 @@ import base64
 import string
 import random
 import itertools
+import parsedatetime
+import datetime
 
 import tornado.web
 import tornado.ioloop
@@ -23,12 +25,11 @@ def b64read(path, name):
 #=============================================================================
 # set the root directory for data, by default we should only be working in the
 # current directory where this python file lives
-ROOT = os.path.join(os.getcwd(), '.tmpr-files')
 CHARS = string.ascii_lowercase + ''.join(map(str, range(10)))
 
 # decide the template's path, either local of the package global
-index = os.path.exists(os.path.join(os.getcwd(), 'templates', 'index.html'))
-template_dir = './templates' if index else dist.location
+local = os.path.exists(os.path.join(os.getcwd(), 'templates', 'index.html'))
+template_dir = './templates' if local else dist.location
 
 FAVICON = b64read(template_dir, 'favicon.png')
 FAVICON2 = b64read(template_dir, 'favicon2.png')
@@ -49,12 +50,120 @@ TMPL_ERROR = string.Template(PAGE_ERROR)
 # flexible configuration options
 MAX_DOWNLOADS = 3
 CODE_LEN = 2
-ALL_CODES = None
-USED_CODES = None
 
 # build the regex used by the app to determine if valid URL
 CODE_REGEX = string.Template(r'/([$chars]{$num})?')
 CODE_REGEX = CODE_REGEX.substitute(chars=CHARS, num=CODE_LEN)
+
+#=============================================================================
+# helper functions that dont directly involve the web responses
+#=============================================================================
+class FileManager(object):
+    def __init__(self, root='./.tmpr-files', char=CHARS, clen=CODE_LEN):
+        self.char = char
+        self.clen = clen
+        self.root = os.path.join(os.getcwd(), root)
+        self.timers = {}
+
+        self.init()
+
+    def init(self, root=None):
+        self.root = root or self.root
+        self.cancel_timers()
+
+        if not os.path.exists(self.root):
+            os.mkdir(self.root)
+
+        files = glob.glob(os.path.join(root, '?'*self.clen))
+        self.used_codes = set([
+            os.path.basename(f) for f in files
+        ])
+        self.all_codes = set([
+            ''.join(i) for i in itertools.product(*(self.char,)*self.clen)
+        ])
+        self.start_timer(self.used_codes)
+
+    def start_timer(self, codes):
+        """ Takes either single code or list of codes and start timers """
+        codes = [codes] if isinstance(code, str) else codes
+        for c in codes:
+            if c in self.timers:
+                continue
+
+            meta = self.open_meta(c)
+            time = date2diff(str2date(meta['time']))
+            self.timers[c] = threading.Timer(time, self.timer_func, args=(c,))
+            self.timers[c].start()
+
+    def timer_func(self, code):
+        print("Deleting {}".format(code))
+        if self.exists(code):
+            self.delete_file(code)
+
+        self.timers.pop(code)
+        self.used_codes.remove(code)
+
+    def cancel_timers(self):
+        for c in self.timers.keys():
+            timer = self.timers[c]
+
+            if timer.isAlive():
+                timer.cancel()
+        self.timers = {}
+
+    def unique_code(self):
+        avail = list(self.all_codes.difference(self.used_codes))
+        if len(avail) == 0:
+            return None
+        return random.choice(avail)
+
+    def path(self, n):
+        return os.path.join(self.root, n)
+
+    def pathj(self, n):
+        return os.path.join(self.root, '{}.json'.format(n))
+
+    def save_file(self, name, content, meta):
+        with open(self.path(name), 'w') as f:
+            f.write(content)
+
+        with open(self.pathj(name), 'w') as f:
+            f.write(json.dumps(meta))
+
+        self.start_timer(name)
+
+    def open_file(self, name):
+        data = open(self.path(name)).read()
+        meta = open(self.pathj(name)).read()
+        return data, json.load(meta)
+
+    def open_meta(self, name):
+        return json.load(open(self.pathj(name)).read())
+
+    def delete_file(self, name):
+        os.remove(self.path(name))
+        os.remove(self.pathj(name))
+
+        timer = self.timers.pop(name)
+        if timer:
+            timer.cancel()
+
+    def exists(self, name):
+        return os.path.isfile(self.path(name))
+
+def dt2date(dt):
+    cal = parsedatetime.Calendar()
+    return cal.parseDT(dt, datetime.datetime.now())[0]
+
+def str2date(string):
+    cal = parsedatetime.Calendar()
+    sec = time.mktime(cal.parse(string)[0])
+    return datetime.datetime.fromtimestamp(sec)
+
+def date2diff(date):
+    return (date - datetime.datetime.now()).total_seconds()
+
+files = FileManager()
 
 #=============================================================================
 # The actual web application now
@@ -97,37 +206,6 @@ class MainHandler(tornado.web.RequestHandler):
         self.request.connection.set_max_body_size(int(1e8))
         super(MainHandler, self).prepare(*args, **kwargs)
 
-    def unique_name(self):
-        avail = list(ALL_CODES.difference(USED_CODES))
-        if len(avail) == 0:
-            return None
-        return random.choice(avail)
-
-    def path(self, n):
-        return os.path.join(ROOT, n)
-
-    def pathj(self, n):
-        return os.path.join(ROOT, '{}.json'.format(n))
-
-    def save_file(self, name, content, meta):
-        with open(self.path(name), 'w') as f:
-            f.write(content)
-
-        with open(self.pathj(name), 'w') as f:
-            f.write(json.dumps(meta))
-
-    def open_file(self, name):
-        data = open(self.path(name)).read()
-        meta = json.loads(open(self.pathj(name)).read())
-        return data, meta
-
-    def delete_file(self, name):
-        os.remove(self.path(name))
-        os.remove(self.pathj(name))
-
-    def exists(self, name):
-        return os.path.isfile(self.path(name))
-
     def error(self, text):
         self.clear()
         self.set_status(404)
@@ -168,11 +246,11 @@ class MainHandler(tornado.web.RequestHandler):
             self.write(PAGE_INDEX)
             self.finish()
         else:
-            if not self.exists(args):
+            if not files.exists(args):
                 self.error('not found')
                 return
 
-            data, meta = self.open_file(args)
+            data, meta = files.open_file(args)
 
             # check the key is present if required
             if meta['key']:
@@ -183,9 +261,9 @@ class MainHandler(tornado.web.RequestHandler):
             # either delete the file or update the view count in the meta data
             meta['n'] -= 1
             if meta['n'] == 0:
-                self.delete_file(args)
+                files.delete_file(args)
             else:
-                self.save_file(args, data, meta)
+                files.save_file(args, data, meta)
 
             # if we are on command line, just return data, otherwise display it pretty
             if self.cli():
@@ -204,14 +282,26 @@ class MainHandler(tornado.web.RequestHandler):
         usern = max(min(usern, MAX_DOWNLOADS), 0)
         meta['n'] = usern
 
+        try:
+            time = dt2date(self.request.arguments.get('time', ['3 days'])[0])
+        except Exception as e:
+            self.error('invalid time')
+            return
+
+        # limit the time between valid parameters
+        tmin = dt2date('1 hour')
+        tmax = dt2date('7 days')
+        time = max(tmin, min(tmax, time))
+        meta['time'] = str(time)
+
         # change to error occured since file already exists
-        if args and self.exists(args):
+        if args and files.exists(args):
             self.error('exists')
             return
 
         if len(self.request.files) == 1:
             # we have files attached, save each of them to new file names
-            name = args or self.unique_name()
+            name = args or files.unique_code()
 
             if name is None:
                 self.error("no codes available")
@@ -224,7 +314,7 @@ class MainHandler(tornado.web.RequestHandler):
             meta.update(fobj)
 
             # write the file and return the accepted name
-            self.save_file(name, body, meta)
+            files.save_file(name, body, meta)
 
             if not self.cli() and not codeonly:
                 response = TMPL_CODE.substitute(namecode=name)
@@ -233,11 +323,12 @@ class MainHandler(tornado.web.RequestHandler):
                 self.write(name)
             self.finish()
 
-            global USED_CODES
-            USED_CODES.update([name])
+            return
+        else:
+            self.error("one file at a time")
             return
 
-        self.error('improper payload')
+        self.error('no file attached')
 
     def cli(self):
         """ Returns true if this URL was visited from the command line """
@@ -245,24 +336,8 @@ class MainHandler(tornado.web.RequestHandler):
         clis = ['curl', 'Wget', 'tmpr']
         return any([i in agent for i in clis])
 
-def used_codes(root):
-    files = glob.glob(os.path.join(root, '??'))
-    return set([
-        os.path.basename(f) for f in files
-    ])
-
 def serve(root=None, port='8888', addr='127.0.0.1'):
-    global ROOT, USED_CODES, ALL_CODES
-
-    ROOT = root or ROOT
-    if not os.path.exists(ROOT):
-        os.mkdir(ROOT)
-
-    USED_CODES = used_codes(ROOT)
-    ALL_CODES = set([
-        ''.join(i) for i in itertools.product(*(CHARS,)*CODE_LEN)
-    ])
-
+    files.init(root)
     app = Application()
     app.listen(port, addr)
     tornado.ioloop.IOLoop.instance().start()
