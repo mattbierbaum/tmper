@@ -23,9 +23,8 @@
 }
 </style>
 <script type='text/javascript'>
-function submit(){
-    butt = document.getElementById('button');
-
+window.onload = function(){
+    document.getElementById('codeurl').focus();
 }
 </script>
 {% end %}
@@ -38,7 +37,7 @@ function submit(){
     <div id='buttons'>
         <input id='button' type='submit' value='Download'>
         <div class='backer'>
-            <label for='key' class='formlbl'>KEY: </label>
+            <label for='key' class='formlbl'>P/W: </label>
             <input type='password' name='key' id='key' class='textinput' value=>
         </div>
     </div>

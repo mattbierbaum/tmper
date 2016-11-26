@@ -7,10 +7,16 @@ import base64
 import string
 import random
 import itertools
+import signal
+import logging
+
+import time
+import threading
 import parsedatetime
 import datetime
 
 import tornado.web
+import tornado.log
 import tornado.ioloop
 import tornado.template
 
@@ -58,11 +64,13 @@ CODE_REGEX = CODE_REGEX.substitute(chars=CHARS, num=CODE_LEN)
 #=============================================================================
 # helper functions that dont directly involve the web responses
 #=============================================================================
+DEFAULT_ROOT = os.path.join(os.getcwd(), './.tmpr-files')
+
 class FileManager(object):
-    def __init__(self, root='./.tmpr-files', char=CHARS, clen=CODE_LEN):
+    def __init__(self, root=DEFAULT_ROOT, char=CHARS, clen=CODE_LEN):
         self.char = char
         self.clen = clen
-        self.root = os.path.join(os.getcwd(), root)
+        self.root = root
         self.timers = {}
 
         self.init()
@@ -74,7 +82,7 @@ class FileManager(object):
         if not os.path.exists(self.root):
             os.mkdir(self.root)
 
-        files = glob.glob(os.path.join(root, '?'*self.clen))
+        files = glob.glob(os.path.join(self.root, '?'*self.clen))
         self.used_codes = set([
             os.path.basename(f) for f in files
         ])
@@ -85,23 +93,21 @@ class FileManager(object):
 
     def start_timer(self, codes):
         """ Takes either single code or list of codes and start timers """
-        codes = [codes] if isinstance(code, str) else codes
+        codes = [codes] if isinstance(codes, str) else codes
         for c in codes:
             if c in self.timers:
                 continue
 
             meta = self.open_meta(c)
             time = date2diff(str2date(meta['time']))
+            time = max([time, 1])
             self.timers[c] = threading.Timer(time, self.timer_func, args=(c,))
             self.timers[c].start()
 
     def timer_func(self, code):
-        print("Deleting {}".format(code))
+        logging.info('deleting {}...'.format(code))
         if self.exists(code):
             self.delete_file(code)
-
-        self.timers.pop(code)
-        self.used_codes.remove(code)
 
     def cancel_timers(self):
         for c in self.timers.keys():
@@ -131,22 +137,26 @@ class FileManager(object):
             f.write(json.dumps(meta))
 
         self.start_timer(name)
+        self.used_codes.update([name])
 
     def open_file(self, name):
         data = open(self.path(name)).read()
         meta = open(self.pathj(name)).read()
-        return data, json.load(meta)
+        return data, json.loads(meta)
 
     def open_meta(self, name):
-        return json.load(open(self.pathj(name)).read())
+        return json.load(open(self.pathj(name)))
 
     def delete_file(self, name):
         os.remove(self.path(name))
         os.remove(self.pathj(name))
 
-        timer = self.timers.pop(name)
-        if timer:
-            timer.cancel()
+        if name in self.timers:
+            timer = self.timers.pop(name)
+            if timer.isAlive():
+                timer.cancel()
+
+        self.used_codes.remove(name)
 
     def exists(self, name):
         return os.path.isfile(self.path(name))
@@ -164,6 +174,12 @@ def date2diff(date):
     return (date - datetime.datetime.now()).total_seconds()
 
 files = FileManager()
+
+def signal_handler(signum, frame):
+    logging.info('exiting...')
+    files.cancel_timers()
+    tornado.ioloop.IOLoop.instance().stop()
+    logging.info('done.')
 
 #=============================================================================
 # The actual web application now
@@ -289,7 +305,7 @@ class MainHandler(tornado.web.RequestHandler):
             return
 
         # limit the time between valid parameters
-        tmin = dt2date('1 hour')
+        tmin = dt2date('1 min')
         tmax = dt2date('7 days')
         time = max(tmin, min(tmax, time))
         meta['time'] = str(time)
@@ -324,11 +340,13 @@ class MainHandler(tornado.web.RequestHandler):
             self.finish()
 
             return
+        elif len(self.request.files) == 0:
+            self.error('no file attached')
+            return
         else:
             self.error("one file at a time")
             return
 
-        self.error('no file attached')
 
     def cli(self):
         """ Returns true if this URL was visited from the command line """
@@ -338,7 +356,10 @@ class MainHandler(tornado.web.RequestHandler):
 
 def serve(root=None, port='8888', addr='127.0.0.1'):
     files.init(root)
+
+    tornado.log.enable_pretty_logging()
     app = Application()
     app.listen(port, addr)
+    signal.signal(signal.SIGINT, signal_handler)
     tornado.ioloop.IOLoop.instance().start()
 

@@ -60,12 +60,24 @@
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+#opt-expand {cursor: pointer;}
+#opt-expand label {cursor: pointer;}
+
+#options {
+    display: flex;
+    flex-direction: row;
+    /*justify-content: space-around;*/
+}
 </style>
 
 <script type='text/javascript'>
 var tests, fld, lbl, cod;
 var busy = false;
 var autosubmit = true;
+var dosimplify = true;
+
+var simple = false;
 
 function setlbl(val) {lbl.value = lbl.innerHTML = val;}
 function setcode(val) {cod.value = cod.innerHTML = val;}
@@ -101,6 +113,29 @@ window.onload = function(){
         document.getElementById('filearg').onchange = func;
         document.getElementById('button').className = 'hidden';
     }
+
+    switcher = function (){
+        if (simple) {
+            simple = false;
+            document.getElementById('opt-n').className = 'backer';
+            document.getElementById('opt-time').className = 'backer';
+            document.getElementById('opt-expand').className = 'backer2';
+            document.getElementById('lbl-key').innerText = 'P/W:';
+            document.getElementById('lbl-expand').innerHTML = '&gt;'
+        } else {
+            simple = true;
+            document.getElementById('opt-n').className = 'backer hidden';
+            document.getElementById('opt-time').className = 'backer hidden';
+            document.getElementById('opt-expand').className = 'backer2';
+            document.getElementById('lbl-key').innerText = 'PASSWORD:';
+            document.getElementById('lbl-expand').innerHTML = '&lt;'
+        }
+    }
+    document.getElementById('opt-expand').onclick = switcher;
+
+    if (dosimplify) {
+        switcher();
+    }
 }
 
 function readfiles() {
@@ -113,6 +148,12 @@ function readfiles() {
     for (var i=0; i<files.length; i++) {
         if (tests.formdata)
             formData.append('file', files[i]);
+    }
+
+    if (tests.formdata){
+        formData.append('n', document.getElementById('n').value);
+        formData.append('time', document.getElementById('time').value);
+        formData.append('key', document.getElementById('key').value);
     }
 
     if (tests.formdata) {
@@ -169,20 +210,25 @@ function readfiles() {
     <span></span>
     </label>
     <br/>
+    <div id='options'>
     <div id='buttons'>
         <input id='button' type='submit' value='Upload'>
-        <div class='backer'>
+        <div id='opt-n' class='backer'>
             <label for='n' class='formlbl'>COUNT: </label>
-            <input type='number' name='n' id='num' class='textinput' value=1 min=1 max=5>
+            <input type='number' name='n' id='n' class='textinput' value=1 min=1 max=5>
         </div>
-        <div class='backer'>
+        <div id='opt-time' class='backer'>
             <label for='time' class='formlbl'>TIME: </label>
             <input type='text' name='time' id='time' class='textinput' value='3 days'>
         </div>
-        <div class='backer'>
-            <label for='key' class='formlbl'>KEY: </label>
+        <div id='opt-key' class='backer'>
+            <label for='key' class='formlbl' id='lbl-key'>P/W: </label>
             <input type='password' name='key' id='key' class='textinput' value=>
         </div>
+    </div>
+    <div id='opt-expand' class='backer2 hidden'>
+        <label class='formlbl2' id='lbl-expand'>&lt;</label>
+    </div>
     </div>
 </form>
 <pre id='codeurl' class='hidden'></pre>
