@@ -72,14 +72,38 @@
 </style>
 
 <script type='text/javascript'>
+var keys = ['n', 'key', 'time'];
 var tests, fld, lbl, cod;
-var busy = false;
-var autosubmit = true;
-var dosimplify = true;
-var simple = false;
+var busy = false;       // whether there is an upload occuring right now
+var autosubmit = true;  // do we auto submit form on dnd or file change
+var simple = false;     // automatically simplify the upload form
 
 function setlbl(val) {lbl.value = lbl.innerHTML = val;}
 function setcode(val) {cod.value = cod.innerHTML = val;}
+
+function readCookie(name) {
+    return (name = new RegExp('(?:^|;\\s*)' + ('' + name).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '=([^;]*)').exec(document.cookie)) && name[1];
+}
+
+function writeCookies(){
+    for (k in keys){
+        writeCookie(keys[k], document.getElementById(keys[k]).value);
+    }
+}
+
+function writeCookie(name, key){
+    var str = name+'='+key+'; ';
+    var d = new Date();
+    d.setTime(d.getTime()+(7*24*60*60*1000));
+    str += 'expires='+d.toGMTString()+'; path=/';
+    document.cookie = str;
+}
+
+function cookie2value(name) {
+    val = readCookie(name);
+    if (val !== null)
+        document.getElementById(name).value = val;
+}
 
 window.onload = function(){
     bdy = document.body;
@@ -121,7 +145,7 @@ window.onload = function(){
             document.getElementById('opt-expand').className = 'backer2';
             document.getElementById('lbl-key').innerText = 'P/W:';
             document.getElementById('lbl-expand').innerHTML = '&gt;';
-            document.cookie = 'false'
+            writeCookie('simple', 'false');
         } else {
             simple = true;
             document.getElementById('opt-n').className = 'backer hidden';
@@ -129,18 +153,30 @@ window.onload = function(){
             document.getElementById('opt-expand').className = 'backer2';
             document.getElementById('lbl-key').innerText = 'PASSWORD:';
             document.getElementById('lbl-expand').innerHTML = '&lt;';
-            document.cookie = 'true'
+            writeCookie('simple', 'true');
         }
     }
     document.getElementById('opt-expand').onclick = switcher;
     document.getElementById('opt-expand').className = 'backer2';
 
-    cookie = document.cookie;
-    if (cookie == 'true') dosimplify = true;
-    if (cookie == 'false') dosimplify = false;
-    if (dosimplify) {
+    if (document.cookie){
+        var cs = readCookie('simple');
+        var lsimple = false;
+        if (cs == 'true')  lsimple = true;
+        if (cs == 'false') lsimple = false;
+        if (cs == null)    lsimple = true;
+        if (simple != lsimple) {switcher();}
+
+        for (k in keys){
+            cookie2value(keys[k]);
+        }
+    } else {
         switcher();
     }
+
+    docookie = function() { writeCookie(this.id, this.value); }
+    for (k in keys)
+        document.getElementById(keys[k]).onchange = docookie;
 }
 
 function readfiles() {
@@ -195,6 +231,7 @@ function readfiles() {
 
         xhr.open('POST', '/?codeonly=true');
         xhr.send(formData);
+        writeCookies();
     }
 }
 </script>
