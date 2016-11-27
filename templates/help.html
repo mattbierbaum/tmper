@@ -17,12 +17,13 @@
 
 <center><h1>Introduction</h1></center>
 <pre class='prebox'>
-TMPR provides temporary file sharing using simple two digit codes (1296
-unique). Each file can have a max number of downloads and password associated
-with it, defaults are 1 download and no password. Max upload size of 128M.
+TMPR provides temporary file sharing using simple {{codelen}} digit codes ({{36**codelen}} unique).
+Each file can have a max number of downloads, file lifetime, and password
+associated with it, defaults are 1 download, 3 days, and no password. Max
+upload size of 128M.
 
 You can upload and download from the web. After uploading to the main site, you
-will be given a 2 digit code which you may share. A particular code may then be
+will be given a {{codelen}} digit code which you may share. A particular code may then be
 downloaded by visiting http://thesite.com/&lt;code&gt;.
 
 To upload and download from command line, we recommend using tmpr as well. This
@@ -59,8 +60,9 @@ POST
     /CODE?ARGS      -- upload file to a particular name
 
     ARGS (optional) :
-        key -- set a password for a particular file
-        n   -- set number of times a file can be downloaded
+        time -- set the lifetime, for each "3 days", "5 mins"
+        key  -- set a password for a particular file
+        n    -- set number of times a file can be downloaded
 
     Example :
         curl -XPOST -F file=@filename http://URL/?key=secretpassword&n=3
@@ -78,14 +80,15 @@ files available to others under the constraints which you ask (lifetime, number
 of downloads permitted, password protection) but again cannot make any
 guarantees.
 
-We do not use cookies or record statistics about the usage of this website
-aside from the time, file type, and file size of each upload. We delete all
-other metadata associated with each file upload. We do not track your visit
-aside from server logs, which are purged periodically. We may look at these
-logs to ensure the health of the site in a hostile internet environment.
-These statements may be checked by viewing the source code, which is available
-under the MIT license -- this code is directly run on a VPS for convenience to
-users.
+We do not record statistics about the usage of this website aside from the
+time, file type, and file size of each upload. We delete all other metadata
+associated with each file upload. We use cookies (client side reading only) to
+keep track of your preferences so that you don't have to fiddle with the
+interface every visit. We do not track your visit aside from server logs, which
+are purged periodically. We may look at these logs to ensure the health of the
+site in a hostile internet environment.  These statements may be checked by
+viewing the source code, which is available under the MIT license -- this code
+is directly run on a VPS for convenience to users.
 </pre>
 
 {% end %}
