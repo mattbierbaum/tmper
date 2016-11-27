@@ -18,7 +18,7 @@
     white-space: pre;
 
     height: 266px;
-    width: 340px;
+    width: {{codelen*170}}px;
     text-align: center;
 }
 </style>
@@ -33,7 +33,7 @@ window.onload = function(){
 <div id='dl'>
 
 <form enctype="multipart/form-data" action='/' method='get' id='form' onsubmit='return submit();'>
-    <input type='text' name='code' id='codeurl' class='border' maxlength='2'/>
+    <input type='text' name='code' id='codeurl' class='border' maxlength='{{codelen}}'/>
     <div id='buttons'>
         <input id='button' type='submit' value='Download'>
         <div class='backer'>

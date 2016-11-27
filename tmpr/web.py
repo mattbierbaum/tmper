@@ -33,6 +33,14 @@ def b64read(path, name):
 # current directory where this python file lives
 CHARS = string.ascii_lowercase + ''.join(map(str, range(10)))
 
+# flexible configuration options
+MAX_DOWNLOADS = 3
+CODE_LEN = 3
+
+# build the regex used by the app to determine if valid URL
+CODE_REGEX = string.Template(r'/([$chars]{$num})?')
+CODE_REGEX = CODE_REGEX.substitute(chars=CHARS, num=CODE_LEN)
+
 # decide the template's path, either local of the package global
 local = os.path.exists(os.path.join(os.getcwd(), 'templates', 'index.html'))
 template_dir = './templates' if local else dist.location
@@ -41,7 +49,7 @@ FAVICON = b64read(template_dir, 'favicon.png')
 FAVICON2 = b64read(template_dir, 'favicon2.png')
 
 # render most of the webpages right now so they are cached
-subs = {'favicon': FAVICON, 'favicon2': FAVICON2}
+subs = {'favicon': FAVICON, 'favicon2': FAVICON2, 'codelen': CODE_LEN}
 loader = tornado.template.Loader(template_dir)
 PAGE_INDEX = loader.load("index.html").generate(**subs)
 PAGE_CODE = loader.load("code.html").generate(**subs)
@@ -52,14 +60,6 @@ PAGE_DOWNLOAD = loader.load("download.html").generate(**subs)
 # also need to leave a few pages templated, let's use string.Template for ease
 TMPL_CODE = string.Template(PAGE_CODE)
 TMPL_ERROR = string.Template(PAGE_ERROR)
-
-# flexible configuration options
-MAX_DOWNLOADS = 3
-CODE_LEN = 2
-
-# build the regex used by the app to determine if valid URL
-CODE_REGEX = string.Template(r'/([$chars]{$num})?')
-CODE_REGEX = CODE_REGEX.substitute(chars=CHARS, num=CODE_LEN)
 
 #=============================================================================
 # helper functions that dont directly involve the web responses
