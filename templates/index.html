@@ -203,7 +203,7 @@ function readfiles() {
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 document.getElementById('form').className = 'hidden';
-                document.getElementById('buttons').className = '';
+                document.getElementById('options').className = '';
                 setcode(xhr.responseText);
                 cod.className = 'border';
                 lbl.className = 'hidden';
@@ -211,7 +211,7 @@ function readfiles() {
             }
             if (xhr.readyState == XMLHttpRequest.OPENED) {
                 document.getElementById('form').className = '';
-                document.getElementById('buttons').className = 'hidden';
+                document.getElementById('options').className = 'hidden';
                 fld.classList = ['pulse'];
                 cod.className = 'hidden';
                 lbl.className = '';
