@@ -9,6 +9,7 @@ import random
 import itertools
 import signal
 import logging
+import bcrypt
 
 import time
 import threading
@@ -25,6 +26,15 @@ dist = pkg_resources.get_distribution('tmpr')
 
 def b64read(path, name):
     return base64.b64encode(open(os.path.join(path, name)).read())
+
+def _ascii(string):
+    return string.encode('ascii', 'xmlcharrefreplace')
+
+def key_hash(key, rounds=5):
+    return bcrypt.hashpw(_ascii(key), bcrypt.gensalt(rounds))
+
+def key_check(key, hashed_key):
+    return (bcrypt.hashpw(_ascii(key), _ascii(hashed_key)) == hashed_key)
 
 #=============================================================================
 # web server functions and data
@@ -130,14 +140,19 @@ class FileManager(object):
         return os.path.join(self.root, '{}.json'.format(n))
 
     def save_file(self, name, content, meta):
-        with open(self.path(name), 'w') as f:
-            f.write(content)
-
-        with open(self.pathj(name), 'w') as f:
-            f.write(json.dumps(meta))
+        self.update_file(name, content)
+        self.update_meta(name, meta)
 
         self.start_timer(name)
         self.used_codes.update([name])
+
+    def update_file(self, name, content):
+        with open(self.path(name), 'w') as f:
+            f.write(content)
+
+    def update_meta(self, name, meta):
+        with open(self.pathj(name), 'w') as f:
+            f.write(json.dumps(meta))
 
     def open_file(self, name):
         data = open(self.path(name)).read()
@@ -269,10 +284,11 @@ class MainHandler(tornado.web.RequestHandler):
                 return
 
             data, meta = files.open_file(args)
+            key = self.request.arguments.get('key', [''])[0]
 
             # check the key is present if required
             if meta['key']:
-                if not meta['key'] == self.request.arguments.get('key', [''])[0]:
+                if not key_check(key, meta['key']):
                     self.error('invalid key')
                     return
 
@@ -281,7 +297,7 @@ class MainHandler(tornado.web.RequestHandler):
             if meta['n'] == 0:
                 files.delete_file(args)
             else:
-                files.save_file(args, data, meta)
+                files.update_meta(args, meta)
 
             # if we are on command line, just return data, otherwise display it pretty
             if self.cli():
@@ -299,6 +315,9 @@ class MainHandler(tornado.web.RequestHandler):
         usern = int(self.request.arguments.get('n', [1])[0])
         usern = max(min(usern, MAX_DOWNLOADS), 0)
         meta['n'] = usern
+
+        if meta['key']:
+            meta['key'] = key_hash(meta['key'])
 
         try:
             time = dt2date(self.request.arguments.get('time', ['3 days'])[0])
