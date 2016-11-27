@@ -173,7 +173,7 @@ def str2date(string):
 def date2diff(date):
     return (date - datetime.datetime.now()).total_seconds()
 
-files = FileManager()
+files = None
 
 def signal_handler(signum, frame):
     logging.info('exiting...')
@@ -357,6 +357,8 @@ class MainHandler(tornado.web.RequestHandler):
         return any([i in agent for i in clis])
 
 def serve(root=None, port='8888', addr='127.0.0.1'):
+    global files
+    files = FileManager()
     files.init(root)
 
     tornado.log.enable_pretty_logging()

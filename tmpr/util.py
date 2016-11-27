@@ -96,7 +96,7 @@ def download(url, code, password='', browser=False):
 
     print(filename)
 
-def upload(url, filename, code='', password='', num=None):
+def upload(url, filename, code='', password='', num=1, time=''):
     """ Upload the file 'filename' to tmpr url """
     url = url or conf_read('url')
     password = password or conf_read('pass')
@@ -108,6 +108,7 @@ def upload(url, filename, code='', password='', num=None):
     url = url if not code else urlparse.urljoin(url, code)
     arg = {} if not password else {'key': password}
     arg = arg if num == 1 else dict(arg, n=num)
+    arg = arg if time == '' else dict(arg, time=time)
 
     name = os.path.basename(filename)
 

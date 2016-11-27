@@ -110,6 +110,8 @@ def main():
     # custom arguments for upload action
     p_upload.add_argument("-n", "--num", type=int, default=1,
         help="number of downloads available for this file")
+    p_upload.add_argument("-t", "--time", type=str, default='',
+        help="lifetime of the file (3 days, 1 min, etc)")
     p_upload.add_argument("-c", "--code", type=str,
         help="optional code for uploaded file")
     p_upload.add_argument("filename", type=str, help="name of file to upload")
@@ -141,7 +143,8 @@ def main():
     elif action == 'upload':
         tmpr.util.upload(
             args.get('url'), args.get('filename'),
-            code=args.get('code'), num=args.get('num'), password=args.get('pass')
+            code=args.get('code'), num=args.get('num'),
+            password=args.get('pass'), time=args.get('time')
         )
 
     elif action == 'conf':
