@@ -19,7 +19,11 @@ setup(name='tmpr',
       url='https://github.com/mattbierbaum/tmpr',
       version='0.4.4',
 
-      install_requires=["tornado>=4.3"],
+      install_requires=[
+          "tornado>=4.3",
+          "parsedatetime>=2.1",
+          "bcrypt>=3.1"
+        ],
       packages=['tmpr'],
       entry_points={
         'console_scripts': [
