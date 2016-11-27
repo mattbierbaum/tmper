@@ -81,7 +81,9 @@ def download(url, code, password='', browser=False):
     response.close()
 
     # extract the intended filename from the headers
-    filename = re.match('.*filename=(.*)$', headers['Content-Disposition']).groups()[0]
+    filename = re.match(
+        '.*filename="(.*)"$', headers['Content-Disposition']
+    ).groups()[0]
 
     # make sure we are not overwriting any files by appending numbers to the end
     if os.path.exists(filename):

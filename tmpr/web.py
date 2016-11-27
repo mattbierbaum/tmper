@@ -349,7 +349,6 @@ class MainHandler(tornado.web.RequestHandler):
             self.error("one file at a time")
             return
 
-
     def cli(self):
         """ Returns true if this URL was visited from the command line """
         agent = self.request.headers['User-Agent']
