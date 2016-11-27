@@ -87,8 +87,9 @@ def download(url, code, password='', browser=False):
 
     # make sure we are not overwriting any files by appending numbers to the end
     if os.path.exists(filename):
+        base, ext = os.path.splitext(filename)
         for i in range(1000):
-            newname = '{}-{}'.format(filename, i)
+            newname = '{}-{}{}'.format(base, i, ext)
             if not os.path.exists(newname):
                 filename = newname
                 break
