@@ -17,7 +17,7 @@ setup(name='tmpr',
       license='MIT License',
       author='Matt Bierbaum',
       url='https://github.com/mattbierbaum/tmpr',
-      version='0.4.4',
+      version='0.5.0',
 
       install_requires=[
           "tornado>=4.3",
