@@ -1,5 +1,7 @@
 *.pyc
 files/*
+.tmpr-files/*
 build/
 dist/
+tmpr.egg-info/
 MANIFEST
