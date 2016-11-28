@@ -166,6 +166,27 @@ a {
 #n {width: 45px;}
 #key {width: 100px;}
 #time {width: 100px;}
+
+.tt {}
+
+.tt .ttt {
+    position: absolute;
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-color: white;
+    padding: 8px;
+    z-index: 1;
+    height: auto;
+    line-height: 100%;
+    font-family: monospace;
+    font-size: 14px;
+}
+.tt:hover .ttt {
+    transition:visibility 0s linear 0.6s;
+    visibility: visible;
+}
+.ttt:hover {visibility: hidden;}
+
 </style>
 {% block head %}{% end %}
 </head>
