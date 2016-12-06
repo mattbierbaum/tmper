@@ -143,7 +143,7 @@ window.onload = function(){
             document.getElementById('opt-n').className = 'backer';
             document.getElementById('opt-time').className = 'backer';
             document.getElementById('opt-expand').className = 'backer2';
-            document.getElementById('lbl-key').innerHTML = "P/W: <span class='ttt'>Password protect file</span>";
+            document.getElementById('lbl-key').innerHTML = "P/W:<span class='ttt'>Password protect file</span>";
             document.getElementById('lbl-expand').innerHTML = '&gt;';
             writeCookie('simple', 'false');
         } else {
@@ -151,7 +151,7 @@ window.onload = function(){
             document.getElementById('opt-n').className = 'backer hidden';
             document.getElementById('opt-time').className = 'backer hidden';
             document.getElementById('opt-expand').className = 'backer2';
-            document.getElementById('lbl-key').innerHTML = "PASSWORD: <span class='ttt'>Password protect file</span>";
+            document.getElementById('lbl-key').innerHTML = "PASSWORD PROTECT FILE:";
             document.getElementById('lbl-expand').innerHTML = '&lt;';
             writeCookie('simple', 'true');
         }
@@ -256,21 +256,15 @@ function readfiles() {
     <div id='buttons'>
         <input id='button' type='submit' value='Upload'>
         <div id='opt-n' class='backer'>
-            <label for='n' class='formlbl tt'>COUNT:
-                <span class='ttt'>Number of downloads</span>
-            </label>
+            <label for='n' class='formlbl tt'>COUNT:<span class='ttt'>Number of downloads</span></label>
             <input type='number' name='n' id='n' class='textinput' value=1 min=1 max=5>
         </div>
         <div id='opt-time' class='backer'>
-            <label for='time' class='formlbl tt'>TIME:
-                <span class='ttt'>Time limit ('5 min', '1 day', '1 week') </span>
-            </label>
+            <label for='time' class='formlbl tt'>TIME:<span class='ttt'>Time limit ('5 min', '1 day', '1 week') </span></label>
             <input type='text' name='time' id='time' class='textinput' value='3 days'>
         </div>
         <div id='opt-key' class='backer'>
-            <label for='key' class='formlbl tt' id='lbl-key'>P/W:
-                <span class='ttt'>Password protect file</span>
-            </label>
+            <label for='key' class='formlbl tt' id='lbl-key'>P/W:<span class='ttt'>Password protect file</span></label>
             <input type='password' name='key' id='key' class='textinput' value=>
         </div>
     </div>

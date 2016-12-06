@@ -16,13 +16,13 @@ except:
     from urllib.parse import urlencode
 
 import pkg_resources
-__version__ = pkg_resources.require("tmpr")[0].version
+__version__ = pkg_resources.require("tmper")[0].version
 
 #=============================================================================
 # command line utility features
 #=============================================================================
 def conf_file():
-    return os.path.expanduser('~/.tmpr.json')
+    return os.path.expanduser('~/.tmper.json')
 
 def argformat(d):
     out = {k:v for k,v in d.items() if v}
@@ -48,7 +48,7 @@ def conf(url='', password=''):
     json.dump(cf, open(filename, 'w'))
 
 def download(url, code, password='', browser=False):
-    """ Download a file 'code' from the tmpr 'url' """
+    """ Download a file 'code' from the tmper 'url' """
     url = url or conf_read('url')
     password = password or conf_read('pass')
 
@@ -64,7 +64,7 @@ def download(url, code, password='', browser=False):
 
     arg = argformat({'key': password})
     rqt = '{}{}'.format(urlparse.urljoin(url, code), arg)
-    hdr = {'User-Agent': 'tmpr/{}'.format(__version__)}
+    hdr = {'User-Agent': 'tmper/{}'.format(__version__)}
     response = requests.get(rqt, headers=hdr)
 
     # if we get an error, print the error and stop
@@ -100,7 +100,7 @@ def download(url, code, password='', browser=False):
     print(filename)
 
 def upload(url, filename, code='', password='', num=1, time=''):
-    """ Upload the file 'filename' to tmpr url """
+    """ Upload the file 'filename' to tmper url """
     url = url or conf_read('url')
     password = password or conf_read('pass')
 
@@ -120,7 +120,7 @@ def upload(url, filename, code='', password='', num=1, time=''):
         sys.exit(1)
 
     with open(filename) as f:
-        hdr = {'User-Agent': 'tmpr/{}'.format(__version__)}
+        hdr = {'User-Agent': 'tmper/{}'.format(__version__)}
         r = requests.post(url, data=arg, files={name: f.read()}, headers=hdr)
         print(r.content.decode('utf-8'))
 

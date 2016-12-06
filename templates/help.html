@@ -17,7 +17,7 @@
 
 <center><h1>Introduction</h1></center>
 <pre class='prebox'>
-TMPR provides temporary file sharing using simple {{codelen}} digit codes ({{36**codelen}} unique).
+TMPER provides temporary file sharing using simple {{codelen}} digit codes ({{36**codelen}} unique).
 Each file can have a max number of downloads, file lifetime, and password
 associated with it, defaults are 1 download, 3 days, and no password. Max
 upload size of 128M.
@@ -26,17 +26,17 @@ You can upload and download from the web. After uploading to the main site, you
 will be given a {{codelen}} digit code which you may share. A particular code may then be
 downloaded by visiting http://thesite.com/&lt;code&gt;.
 
-To upload and download from command line, we recommend using tmpr as well. This
-can be done by the short commands u, d (see `tmpr --help` for details).
+To upload and download from command line, we recommend using tmper as well. This
+can be done by the short commands u, d (see `tmper --help` for details).
 
-    pip install tmpr
-    tmpr c --url=&lt;some url&gt;       # set the default tmpr url
-    tmpr u /path/to/some/file     # upload file and get 2 digit code
-    tmpr d &lt;code&gt;                 # download the code
+    pip install tmper
+    tmper c --url=&lt;some url&gt;       # set the default tmper url
+    tmper u /path/to/some/file     # upload file and get 2 digit code
+    tmper d &lt;code&gt;                 # download the code
 
 You can also start a server of your own using:
 
-    tmpr s --port=&lt;port&gt;
+    tmper s --port=&lt;port&gt;
 </pre>
 
 <center><h1>API endpoints</h1></center>
@@ -68,7 +68,7 @@ POST
         curl -XPOST -F file=@filename http://URL/?key=secretpassword&n=3
 
 # function for .bashrc to simplify upload
-function tmpr() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
+function tmper() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
 </pre>
 
 <center><h1>Privacy and terms (ish)</h1></center>

@@ -1,4 +1,4 @@
-tmpr : temp file sharing
+tmper : temp file sharing
 =========================
 
 A very simple file sharing utility that launches quickly and allows sharing
@@ -8,14 +8,14 @@ If there is an existing server then you can easily interact with it through
 the command line interface. In this case, set the global url option then
 upload and download::
 
-    tmpr c --url=http://some.url.com/       # configure a global url
-    tmpr u /some/file                       # upload a file and receive code
-    tmpr d <code>                           # download file code
+    tmper c --url=http://some.url.com/       # configure a global url
+    tmper u /some/file                       # upload a file and receive code
+    tmper d <code>                           # download file code
 
-For more information, look into tmpr --help. If there is no server you can
+For more information, look into tmper --help. If there is no server you can
 easily start one yourself. In the basic form, simply run::
 
-    tmpr s      # 's' is short for serve, see tmpr --help
+    tmper s      # 's' is short for serve, see tmper --help
 
 and point your browser to http://127.0.0.1:8888.  From there, you can follow
 the directions to upload and download files.  By default, it only runs on the

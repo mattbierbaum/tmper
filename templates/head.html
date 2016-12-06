@@ -2,7 +2,7 @@
 
 <link id="favicon" rel="shortcut icon" type="image/png"
     href="data:image/png;base64,{{favicon}}">
-<title>tmpr : file share</title>
+<title>tmper : file share</title>
 
 <style media="screen" type="text/css">
 body {
@@ -139,10 +139,15 @@ a {
     font-weight: bold;
     font-size: 18px;
     padding-left: 12px;
-    padding-right: 6px;
     text-align: center;
     height: 61px;
     line-height: 45px;
+    font-family: monospace;
+}
+
+.formlbl:after {
+    /*content: '?';*/
+    color: rgba(255,255,255,0.5);
 }
 
 .formlbl2 {
@@ -195,8 +200,7 @@ a {
 <div id='bkg'>
 <div id='page'>
     <div id='header'>
-        <a href='/' class='title elm left'>TMPR: FILE SHARING</a>
-        <a href='https://github.com/mattbierbaum/tmpr' class='elm right'>Source</a>
+        <a href='/' class='title elm left'>TMPER: FILE SHARING</a>
         <a href='/help' class='elm right'>Help</a>
         <!--<a href='/stats' class='elm right'>Stats</a>-->
         <a href='/download' class='elm right'>Download</a>
@@ -205,7 +209,7 @@ a {
     {% block content %}{% end %}
     
     <div id='footer'>
-        <pre class='love'>Made with &lt;3 by <a href='http://runat.me/'>runat.me</a></pre>
+        <pre class='love'><a href='https://github.com/mattbierbaum/tmper' class='elm right'>Made</a> with &lt;3 by <a href='http://hey.runat.me/'>runat.me</a></pre>
     </div>
 </div></div>
 </body></html>

@@ -22,7 +22,7 @@ import tornado.ioloop
 import tornado.template
 
 import pkg_resources
-dist = pkg_resources.get_distribution('tmpr')
+dist = pkg_resources.get_distribution('tmper')
 
 def b64read(path, name):
     return base64.b64encode(open(os.path.join(path, name)).read())
@@ -74,7 +74,7 @@ TMPL_ERROR = string.Template(PAGE_ERROR)
 #=============================================================================
 # helper functions that dont directly involve the web responses
 #=============================================================================
-DEFAULT_ROOT = os.path.join(os.getcwd(), './.tmpr-files')
+DEFAULT_ROOT = os.path.join(os.getcwd(), './.tmper-files')
 
 class FileManager(object):
     def __init__(self, root=DEFAULT_ROOT, char=CHARS, clen=CODE_LEN):
@@ -371,7 +371,7 @@ class MainHandler(tornado.web.RequestHandler):
     def cli(self):
         """ Returns true if this URL was visited from the command line """
         agent = self.request.headers['User-Agent']
-        clis = ['curl', 'Wget', 'tmpr']
+        clis = ['curl', 'Wget', 'tmper']
         return any([i in agent for i in clis])
 
 def serve(root=None, port='8888', addr='127.0.0.1'):

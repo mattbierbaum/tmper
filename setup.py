@@ -13,10 +13,10 @@ except IOError as e:
 
 templates = glob.glob('templates/*')
 
-setup(name='tmpr',
+setup(name='tmper',
       license='MIT License',
       author='Matt Bierbaum',
-      url='https://github.com/mattbierbaum/tmpr',
+      url='https://github.com/mattbierbaum/tmper',
       version='0.5.0',
 
       install_requires=[
@@ -24,10 +24,10 @@ setup(name='tmpr',
           "parsedatetime>=2.1",
           "bcrypt>=3.1"
         ],
-      packages=['tmpr'],
+      packages=['tmper'],
       entry_points={
         'console_scripts': [
-            'tmpr = tmpr.__main__:main'
+            'tmper = tmper.__main__:main'
         ]
       },
       data_files=[('', templates)],

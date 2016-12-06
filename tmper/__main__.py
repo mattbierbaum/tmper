@@ -5,11 +5,11 @@ import os
 import sys
 import argparse
 
-import tmpr.web
-import tmpr.util
+import tmper.web
+import tmper.util
 
 import pkg_resources
-__version__ = pkg_resources.require("tmpr")[0].version
+__version__ = pkg_resources.require("tmper")[0].version
 
 #=============================================================================
 # command line parsing and main
@@ -54,15 +54,15 @@ description = "Simple file sharing utility with download limits and password pro
 epilog = """
 Example usage:
     # set the default url, upload a file, and download the file
-    tmpr c --url=http://tmpr.meganet.com/
-    tmpr u /path/to/file
-    tmpr d yu
+    tmper c --url=http://tmper.meganet.com/
+    tmper u /path/to/file
+    tmper d yu
 
     # upload a file with a password
-    tmpr upload --pass=34lkjsmdfn3i4usldf filename.txt
+    tmper upload --pass=34lkjsmdfn3i4usldf filename.txt
 
     # upload to a particular code
-    tmpr upload -c 00 filename.txt
+    tmper upload -c 00 filename.txt
 """
 
 def main():
@@ -75,7 +75,7 @@ def main():
     # shared arguments between upload and download
     shared = argparse.ArgumentParser(add_help=False)
     shared.add_argument("-u", "--url", type=str, default='',
-        help="URL of tmpr service with which to interact")
+        help="URL of tmper service with which to interact")
     shared.add_argument("-p", "--pass", type=str, default='',
         help="password for uploaded file")
 
@@ -87,9 +87,9 @@ def main():
     kw = {'formatter_class': ShortFormatter}
     kw2 = dict(kw, parents=[shared])
 
-    p_conf = sub.add_parser(help="configure defaults for tmpr", **dict(_fmt('conf'), **kw2))
-    p_serve = sub.add_parser(help="run the tmpr webserver", **dict(_fmt('serve'), **kw))
-    p_upload = sub.add_parser(help="upload a file to tmpr", **dict(_fmt('upload'), **kw2))
+    p_conf = sub.add_parser(help="configure defaults for tmper", **dict(_fmt('conf'), **kw2))
+    p_serve = sub.add_parser(help="run the tmper webserver", **dict(_fmt('serve'), **kw))
+    p_upload = sub.add_parser(help="upload a file to tmper", **dict(_fmt('upload'), **kw2))
     p_download = sub.add_parser(help="download an uploaded file", **dict(_fmt('download'), **kw2))
 
     p_conf.set_defaults(action='conf')
@@ -97,7 +97,7 @@ def main():
     p_download.set_defaults(action='download')
     p_upload.set_defaults(action='upload')
 
-    root = os.path.join(os.getcwd(), '.tmpr-files')
+    root = os.path.join(os.getcwd(), '.tmper-files')
 
     # custom arguments for server action
     p_serve.add_argument("-a", "--addr", type=str, default='127.0.0.1',
@@ -130,25 +130,25 @@ def main():
     action = args.get('action')
 
     if action == 'serve':
-        tmpr.web.serve(
+        tmper.web.serve(
             root=args.get('root'), port=args.get('port'), addr=args.get('addr')
         )
 
     elif action == 'download':
-        tmpr.util.download(
+        tmper.util.download(
             args.get('url'), args.get('code'), 
             password=args.get('pass'), browser=args.get('browser')
         )
 
     elif action == 'upload':
-        tmpr.util.upload(
+        tmper.util.upload(
             args.get('url'), args.get('filename'),
             code=args.get('code'), num=args.get('num'),
             password=args.get('pass'), time=args.get('time')
         )
 
     elif action == 'conf':
-        tmpr.util.conf(
+        tmper.util.conf(
             url=args.get('url'), password=args.get('pass')
         )
 

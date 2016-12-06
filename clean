@@ -1,2 +1,2 @@
 #!/bin/bash
-rm -rf build/ dist/ tmpr.egg-info/ files/ .tmpr-files/ MANIFEST
+rm -rf build/ dist/ tmper.egg-info/ files/ .tmper-files/ MANIFEST
