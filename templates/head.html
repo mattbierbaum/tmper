@@ -145,11 +145,6 @@ a {
     font-family: monospace;
 }
 
-.formlbl:after {
-    /*content: '?';*/
-    color: rgba(255,255,255,0.5);
-}
-
 .formlbl2 {
     color: white;
     font-weight: bold;
@@ -174,7 +169,19 @@ a {
 
 .tt {}
 
+.tt {
+    visibility: hidden;
+    vertical-align: super;
+    transform: translate(-2.3ch, -0.6ch);
+    position: absolute;
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+}
+
+
 .tt .ttt {
+    color: white;
     position: absolute;
     visibility: hidden;
     background-color: rgba(0, 0, 0, 0.9);
@@ -187,11 +194,14 @@ a {
     font-size: 14px;
 }
 .tt:hover .ttt {
-    transition:visibility 0s linear 0.6s;
+    transition:visibility 0s linear 0.1s;
     visibility: visible;
 }
 .ttt:hover {visibility: hidden;}
 
+#buttons:hover .tt {
+    visibility: visible;
+}
 </style>
 {% block head %}{% end %}
 </head>
