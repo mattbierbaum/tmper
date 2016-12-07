@@ -24,14 +24,13 @@ upload size of 128M.
 
 You can upload and download from the web. After uploading to the main site, you
 will be given a {{codelen}} digit code which you may share. A particular code may then be
-downloaded by visiting http://thesite.com/&lt;code&gt;.
+downloaded by visiting https://tmper.co/&lt;code&gt;.
 
 To upload and download from command line, we recommend using tmper as well. This
 can be done by the short commands u, d (see `tmper --help` for details).
 
     pip install tmper
-    tmper c --url=&lt;some url&gt;       # set the default tmper url
-    tmper u /path/to/some/file     # upload file and get 2 digit code
+    tmper u /path/to/some/file     # upload file and get 3 digit code
     tmper d &lt;code&gt;                 # download the code
 
 You can also start a server of your own using:
@@ -51,9 +50,9 @@ GET
         v - view contents on website rather than raw download
 
     Examples :
-        curl http://URL/ui
-        curl http://URL/ab?key=supersecretpassword
-        firefox http://URL/7e?v
+        curl https://tmper.co/uik
+        curl https://tmper.co/ab8?key=supersecretpassword
+        firefox https://tmper.co/7el?v
 
 POST
     /?ARGS          -- upload a file and receive a name
@@ -65,10 +64,10 @@ POST
         n    -- set number of times a file can be downloaded
 
     Example :
-        curl -XPOST -F file=@filename http://URL/?key=secretpassword&n=3
+        curl -XPOST -F file=@filename https://tmper.co/?key=secretpassword&n=3
 
 # function for .bashrc to simplify upload
-function tmper() { curl -X POST -F file=@"$$1" &lt;URL&gt; }
+function tmper() { curl -X POST -F file=@"$$1" https://tmper.co/ }
 </pre>
 
 <center><h1>Privacy and terms (ish)</h1></center>
