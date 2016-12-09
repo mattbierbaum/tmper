@@ -22,6 +22,20 @@
     50% {opacity: 1.0;}
 }
 
+#overlay {
+    font-family: monospace;
+    text-align: center;
+    color: white;
+    font-size: 32px;
+    background-color:
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: rgba(0,0,0,0.4);
+    padding: 7px;
+}
+
 #content {
     display: flex;
     justify-content: center;
@@ -243,9 +257,20 @@ function readfiles() {
 <form enctype="multipart/form-data" action='/' method='post' id='form'>
     <input type='file' id='filearg' name='filearg' class='inputfile'/><br/>
     <label for='filearg'>
+        <center><span id='overlay'>Select file & upload:</span></center>
+        <br/>
         <center>
         <svg id='folder' width='512' height='420' viewBox='0 4 32 26'>
-            <path d="M18 8l-4-4h-14v26h32v-22h-14zM16 15l7 7h-5v8h-4v-8h-5l7-7z"/>
+            <defs>
+                <linearGradient id="gradient" x1="0" y1="0%" x2 ="0" y2="100%">
+                    <stop stop-color="black" offset="0"/>
+                    <stop stop-color="white" offset="1"/>
+                </linearGradient>
+                <mask id="masking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+                    <rect y="0.0" width="1" height="1" fill="url(#gradient)" />
+                </mask>
+            </defs>
+            <path d="M18 8l-4-4h-14v26h32v-22h-14zM16 15l7 7h-5v8h-4v-8h-5l7-7z" style='mask: url(#masking);'/>
             <pre id='percent' class='hidden'></pre>
         </svg>
         </center>
