@@ -203,6 +203,7 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/help", HelpHandler),
+            (r"/error-size", ErrorSizeHandler),
             (r"/download", DownloadHandler),
             (CODE_REGEX, MainHandler)
         ]
@@ -210,42 +211,48 @@ class Application(tornado.web.Application):
             handlers, default_handler_class=DefaultHandler, gzip=True
         )
 
-class HelpHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write(PAGE_HELP)
-        self.finish()
-
-class DownloadHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write(PAGE_DOWNLOAD)
-        self.finish()
-
-class DefaultHandler(tornado.web.RequestHandler):
-    def prepare(self):
-        # Override prepare() instead of get() to cover all possible HTTP methods.
-        self.set_status(404)
-        self.write(TMPL_ERROR.substitute(error='404'))
-        self.finish()
-
-    def write_error(self, status_code, **kwargs):
-        self.set_status(status_code)
-        self.write(TMPL_ERROR.substitute(error=status_code))
-        self.finish()
-
-class MainHandler(tornado.web.RequestHandler):
-    def prepare(self, *args, **kwargs):
-        self.request.connection.set_max_body_size(int(1e8))
-        super(MainHandler, self).prepare(*args, **kwargs)
-
-    def error(self, text):
+class Handler(tornado.web.RequestHandler):
+    def error(self, text, code=404):
         self.clear()
-        self.set_status(404)
+        self.set_status(code)
 
         if self.cli():
             self.write(text)
         else:
             self.write(TMPL_ERROR.substitute(error=text))
         self.finish()
+
+    def cli(self):
+        """ Returns true if this URL was visited from the command line """
+        agent = self.request.headers['User-Agent']
+        clis = ['curl', 'Wget', 'tmper']
+        return any([i in agent for i in clis])
+
+class HelpHandler(Handler):
+    def get(self):
+        self.write(PAGE_HELP)
+        self.finish()
+
+class DownloadHandler(Handler):
+    def get(self):
+        self.write(PAGE_DOWNLOAD)
+        self.finish()
+
+class DefaultHandler(Handler):
+    def prepare(self):
+        self.error('404')
+
+    def write_error(self, status_code, **kwargs):
+        self.error(status_code, status_code)
+
+class ErrorSizeHandler(Handler):
+    def get(self):
+        self.error('Filesize > 128MB', 413)
+
+class MainHandler(Handler):
+    def prepare(self, *args, **kwargs):
+        self.request.connection.set_max_body_size(int(1e8))
+        super(MainHandler, self).prepare(*args, **kwargs)
 
     def serve_file_headers(self, meta):
         self.set_header('Content-Type', meta['content_type'])
@@ -367,12 +374,6 @@ class MainHandler(tornado.web.RequestHandler):
         else:
             self.error("one file at a time")
             return
-
-    def cli(self):
-        """ Returns true if this URL was visited from the command line """
-        agent = self.request.headers['User-Agent']
-        clis = ['curl', 'Wget', 'tmper']
-        return any([i in agent for i in clis])
 
 def serve(root=None, port='8888', addr='127.0.0.1'):
     global files

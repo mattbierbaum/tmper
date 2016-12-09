@@ -39,6 +39,7 @@ especially for larger max file sizes::
         location / {
             client_body_buffer_size    1M;
             client_max_body_size       128M;
+            error_page 413 /error-size;
 
             proxy_pass http://localhost:3333;
             proxy_set_header Host $http_host;

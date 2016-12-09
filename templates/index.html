@@ -179,11 +179,32 @@ window.onload = function(){
         document.getElementById(keys[k]).onchange = docookie;
 }
 
+function show_error(msg, time){
+    var lay = document.getElementById('overlay');
+    txt = lay.innerText;
+    lay.innerText = msg;
+    lay.style.color = 'red';
+    setTimeout(function(){
+        lay.innerText = txt;
+        lay.style.color = 'white';
+    }, time*1000);
+}
+
 function readfiles() {
     files = document.getElementById('filearg').files;
+    console.log(files);
 
-    if (files.length == 0 || busy)
+    if (busy) return;
+
+    if (files.length == 0){
+        show_error('No file selected');
         return;
+    }
+
+    if (files[0].size > 128000000){
+        show_error('Filesize > 128MB', 5);
+        return;
+    }
 
     var formData = tests.formdata ? new FormData() : null;
     for (var i=0; i<files.length; i++) {
