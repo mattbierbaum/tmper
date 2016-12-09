@@ -22,20 +22,6 @@
     50% {opacity: 1.0;}
 }
 
-#overlay {
-    font-family: monospace;
-    text-align: center;
-    color: white;
-    font-size: 32px;
-    background-color:
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    background-color: rgba(0,0,0,0.4);
-    padding: 7px;
-}
-
 #content {
     display: flex;
     justify-content: center;
@@ -165,7 +151,7 @@ window.onload = function(){
             document.getElementById('opt-n').className = 'backer hidden';
             document.getElementById('opt-time').className = 'backer hidden';
             document.getElementById('opt-expand').className = 'backer2';
-            document.getElementById('lbl-key').innerHTML = "PASSWORD PROTECT FILE:\n<span class='tt'>?<pre class='ttt'>Password protect file</pre></span>";
+            document.getElementById('lbl-key').innerHTML = "PASSWORD PROTECT FILE:\n<span class='tt'>?<pre class='ttt'>Provide password to give selective access to file</pre></span>";
             document.getElementById('lbl-expand').innerHTML = '&lt;';
             writeCookie('simple', 'true');
         }
@@ -218,6 +204,7 @@ function readfiles() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 document.getElementById('form').className = 'hidden';
                 document.getElementById('options').className = '';
+                document.getElementById('overlay').className = '';
                 setcode(xhr.responseText);
                 cod.className = 'border';
                 lbl.className = 'hidden';
@@ -226,6 +213,7 @@ function readfiles() {
             if (xhr.readyState == XMLHttpRequest.OPENED) {
                 document.getElementById('form').className = '';
                 document.getElementById('options').className = 'hidden';
+                document.getElementById('overlay').className = 'hidden';
                 fld.classList = ['pulse'];
                 cod.className = 'hidden';
                 lbl.className = '';
@@ -255,22 +243,12 @@ function readfiles() {
 <br/>
 <div id='content' class=''>
 <form enctype="multipart/form-data" action='/' method='post' id='form'>
+    <center><span id='overlay'>Select file & upload:</span></center>
     <input type='file' id='filearg' name='filearg' class='inputfile'/><br/>
     <label for='filearg'>
-        <center><span id='overlay'>Select file & upload:</span></center>
-        <br/>
         <center>
         <svg id='folder' width='512' height='420' viewBox='0 4 32 26'>
-            <defs>
-                <linearGradient id="gradient" x1="0" y1="0%" x2 ="0" y2="100%">
-                    <stop stop-color="black" offset="0"/>
-                    <stop stop-color="white" offset="1"/>
-                </linearGradient>
-                <mask id="masking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
-                    <rect y="0.0" width="1" height="1" fill="url(#gradient)" />
-                </mask>
-            </defs>
-            <path d="M18 8l-4-4h-14v26h32v-22h-14zM16 15l7 7h-5v8h-4v-8h-5l7-7z" style='mask: url(#masking);'/>
+            <path d="M18 8l-4-4h-14v26h32v-22h-14zM16 15l7 7h-5v8h-4v-8h-5l7-7z"/>
             <pre id='percent' class='hidden'></pre>
         </svg>
         </center>
