@@ -4,6 +4,7 @@ import re
 import os
 import sys
 import json
+import copy
 import webbrowser
 import requests
 
@@ -18,6 +19,8 @@ except:
 import pkg_resources
 __version__ = pkg_resources.require("tmper")[0].version
 
+defaults = {'url': 'https://tmper.co/'}
+
 #=============================================================================
 # command line utility features
 #=============================================================================
@@ -29,10 +32,11 @@ def argformat(d):
     return '?'+urlencode(out) if out else ''
 
 def conf_read(key):
+    defs = copy.deepcopy(defaults)
     filename = conf_file()
     if os.path.exists(filename):
-        return json.load(open(filename)).get(key)
-    return {}
+        defs.update(json.load(open(filename)))
+    return defs.get(key)
 
 def conf(url='', password=''):
     filename = conf_file()

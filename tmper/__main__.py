@@ -74,7 +74,7 @@ def main():
 
     # shared arguments between upload and download
     shared = argparse.ArgumentParser(add_help=False)
-    shared.add_argument("-u", "--url", type=str, default='https://tmper.co/',
+    shared.add_argument("-u", "--url", type=str, default='',
         help="URL of tmper service with which to interact")
     shared.add_argument("-p", "--pass", type=str, default='',
         help="password for uploaded file")
