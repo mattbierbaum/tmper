@@ -53,8 +53,7 @@ class ShortFormatter(argparse.HelpFormatter):
 description = "Simple file sharing utility with download limits and password protection"
 epilog = """
 Example usage:
-    # set the default url, upload a file, and download the file
-    tmper c --url=http://tmper.meganet.com/
+    # upload a file, and download the file
     tmper u /path/to/file
     tmper d yu
 
@@ -62,7 +61,7 @@ Example usage:
     tmper upload --pass=34lkjsmdfn3i4usldf filename.txt
 
     # upload to a particular code
-    tmper upload -c 00 filename.txt
+    tmper upload -c aaa filename.txt
 """
 
 def main():
@@ -75,7 +74,7 @@ def main():
     # shared arguments between upload and download
     shared = argparse.ArgumentParser(add_help=False)
     shared.add_argument("-u", "--url", type=str, default='',
-        help="URL of tmper service with which to interact")
+            help="URL of tmper service with which to interact (default destination is https://tmper.co)")
     shared.add_argument("-p", "--pass", type=str, default='',
         help="password for uploaded file")
 
