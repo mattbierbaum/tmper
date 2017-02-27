@@ -17,7 +17,7 @@ setup(name='tmper',
       license='MIT License',
       author='Matt Bierbaum',
       url='https://github.com/mattbierbaum/tmper',
-      version='0.5.3',
+      version='0.5.5',
 
       install_requires=[
           "tornado>=4.3",
@@ -30,8 +30,9 @@ setup(name='tmper',
             'tmper = tmper.__main__:main'
         ]
       },
-      data_files=[('', templates)],
-      package_data={'': ['README.md']},
+      package_data={
+        'tmper': ['../README.md', '../templates/*']
+      },
 
       platforms='osx, posix, linux, windows',
       description='Temporary file sharing using simple two digit codes.',

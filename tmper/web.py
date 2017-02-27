@@ -53,7 +53,7 @@ CODE_REGEX = CODE_REGEX.substitute(chars=CHARS, num=CODE_LEN)
 
 # decide the template's path, either local of the package global
 local = os.path.exists(os.path.join(os.getcwd(), 'templates', 'index.html'))
-template_dir = './templates' if local else dist.location
+template_dir = './templates' if local else os.path.join(dist.location, 'templates')
 
 FAVICON = b64read(template_dir, 'favicon.png')
 FAVICON2 = b64read(template_dir, 'favicon2.png')
