@@ -69,7 +69,7 @@ def download(url, code, password='', browser=False):
     arg = argformat({'key': password})
     rqt = '{}{}'.format(urlparse.urljoin(url, code), arg)
     hdr = {'User-Agent': 'tmper/{}'.format(__version__)}
-    response = requests.get(rqt, headers=hdr)
+    response = requests.get(rqt, headers=hdr, stream=True)
 
     # if we get an error, print the error and stop
     if response.status_code != 200:
@@ -81,8 +81,6 @@ def download(url, code, password='', browser=False):
         sys.exit(1)
 
     headers = response.headers
-    contents = response.content
-    response.close()
 
     # extract the intended filename from the headers
     filename = re.match(
@@ -99,8 +97,10 @@ def download(url, code, password='', browser=False):
                 break
 
     with open(filename, 'wb') as f:
-        f.write(contents)
+        for chunk in response.iter_content(chunk_size=1024):
+            f.write(chunk)
 
+    response.close()
     print(filename)
 
 def upload(url, filename, code='', password='', num=1, time=''):
@@ -123,8 +123,8 @@ def upload(url, filename, code='', password='', num=1, time=''):
         print("File '{}' does not exist".format(filename), file=sys.stderr)
         sys.exit(1)
 
-    with open(filename) as f:
+    with open(filename, 'rb') as f:
         hdr = {'User-Agent': 'tmper/{}'.format(__version__)}
-        r = requests.post(url, data=arg, files={name: f.read()}, headers=hdr)
+        r = requests.post(url, data=arg, files={name: f}, headers=hdr)
         print(r.content.decode('utf-8'))
 
