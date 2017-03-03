@@ -22,7 +22,9 @@ setup(name='tmper',
       install_requires=[
           "tornado>=4.3",
           "parsedatetime>=2.1",
-          "bcrypt>=3.1"
+          "bcrypt>=3.1",
+          "requests>=2.0",
+          "requests_toolbelt>=0.7"
         ],
       packages=['tmper'],
       entry_points={

@@ -6,7 +6,9 @@ import sys
 import json
 import copy
 import webbrowser
+import mimetypes
 import requests
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 try:
     import urlparse
@@ -18,6 +20,8 @@ except:
 
 import pkg_resources
 __version__ = pkg_resources.require("tmper")[0].version
+
+from tmper import progress
 
 defaults = {'url': 'https://tmper.co/'}
 
@@ -96,9 +100,14 @@ def download(url, code, password='', browser=False):
                 filename = newname
                 break
 
+    chunk_size = 8096
+    nbytes = int(headers['Content-Length'])
+    bar = progress.ProgressBar(nbytes)
     with open(filename, 'wb') as f:
-        for chunk in response.iter_content(chunk_size=1024):
+        for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
             f.write(chunk)
+            bar.update(i*chunk_size)
+    bar.update(nbytes)
 
     response.close()
     print(filename)
@@ -123,8 +132,27 @@ def upload(url, filename, code='', password='', num=1, time=''):
         print("File '{}' does not exist".format(filename), file=sys.stderr)
         sys.exit(1)
 
+    def create_callback(encoder):
+        bar = progress.ProgressBar(encoder.len)
+
+        def callback(monitor):
+            bar.update(monitor.bytes_read)
+
+        return callback
+
     with open(filename, 'rb') as f:
-        hdr = {'User-Agent': 'tmper/{}'.format(__version__)}
-        r = requests.post(url, data=arg, files={name: f}, headers=hdr)
+        mimetype = mimetypes.guess_type(filename)[0] or 'application/unknown'
+
+        # prepare the streaming form uploader (with progress bar)
+        encoder = MultipartEncoder(dict(arg, filearg=(filename, f, mimetype)))
+        callback = create_callback(encoder)
+        monitor = MultipartEncoderMonitor(encoder, callback)
+
+        header = {
+            'User-Agent': 'tmper/{}'.format(__version__),
+            'Content-Type': monitor.content_type
+        }
+
+        r = requests.post(url, data=monitor, headers=header)
         print(r.content.decode('utf-8'))
 
