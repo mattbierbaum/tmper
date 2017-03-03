@@ -55,7 +55,7 @@ def conf(url='', password=''):
         cf.update({'pass': password})
     json.dump(cf, open(filename, 'w'))
 
-def download(url, code, password='', browser=False):
+def download(url, code, password='', browser=False, disp=False):
     """ Download a file 'code' from the tmper 'url' """
     url = url or conf_read('url')
     password = password or conf_read('pass')
@@ -102,7 +102,7 @@ def download(url, code, password='', browser=False):
 
     chunk_size = 8096
     nbytes = int(headers['Content-Length'])
-    bar = progress.ProgressBar(nbytes)
+    bar = progress.ProgressBar(nbytes, display=disp)
     with open(filename, 'wb') as f:
         for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
             f.write(chunk)
@@ -112,7 +112,7 @@ def download(url, code, password='', browser=False):
     response.close()
     print(filename)
 
-def upload(url, filename, code='', password='', num=1, time=''):
+def upload(url, filename, code='', password='', num=1, time='', disp=False):
     """ Upload the file 'filename' to tmper url """
     url = url or conf_read('url')
     password = password or conf_read('pass')
@@ -133,7 +133,7 @@ def upload(url, filename, code='', password='', num=1, time=''):
         sys.exit(1)
 
     def create_callback(encoder):
-        bar = progress.ProgressBar(encoder.len)
+        bar = progress.ProgressBar(encoder.len, display=disp)
 
         def callback(monitor):
             bar.update(monitor.bytes_read)

@@ -74,7 +74,8 @@ def main():
     # shared arguments between upload and download
     shared = argparse.ArgumentParser(add_help=False)
     shared.add_argument("-u", "--url", type=str, default='',
-            help="URL of tmper service with which to interact (default destination is https://tmper.co)")
+        help="URL of tmper service with which to interact"
+             "(default destination is https://tmper.co)")
     shared.add_argument("-p", "--pass", type=str, default='',
         help="password for uploaded file")
 
@@ -113,6 +114,9 @@ def main():
         help="lifetime of the file (3 days, 1 min, etc)")
     p_upload.add_argument("-c", "--code", type=str,
         help="optional code for uploaded file")
+    p_upload.add_argument("-d", "--progress", dest='progress',
+        action='store_true', default=False,
+        help="show progress bar while transferring files")
     p_upload.add_argument("filename", type=str, help="name of file to upload")
 
     # custom arguments for download action
@@ -120,6 +124,9 @@ def main():
         "-b", "--browser", dest='browser', action='store_true',
         help="open the file in a browser"
     )
+    p_download.add_argument("-d", "--progress", dest='progress',
+        action='store_true', default=False,
+        help="show progress bar while transferring files")
     p_download.add_argument("code", type=str, help="code of download file")
 
     # version information
@@ -136,14 +143,16 @@ def main():
     elif action == 'download':
         tmper.util.download(
             args.get('url'), args.get('code'), 
-            password=args.get('pass'), browser=args.get('browser')
+            password=args.get('pass'), browser=args.get('browser'),
+            disp=args.get('progress')
         )
 
     elif action == 'upload':
         tmper.util.upload(
             args.get('url'), args.get('filename'),
             code=args.get('code'), num=args.get('num'),
-            password=args.get('pass'), time=args.get('time')
+            password=args.get('pass'), time=args.get('time'),
+            disp=args.get('progress')
         )
 
     elif action == 'conf':
