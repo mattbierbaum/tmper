@@ -155,4 +155,5 @@ def upload(url, filename, code='', password='', num=1, time='', disp=False):
 
         r = requests.post(url, data=monitor, headers=header)
         print(r.content.decode('utf-8'))
+        r.close()
 
