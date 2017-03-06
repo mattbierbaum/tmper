@@ -17,7 +17,7 @@ setup(name='tmper',
       license='MIT License',
       author='Matt Bierbaum',
       url='https://github.com/mattbierbaum/tmper',
-      version='0.5.5',
+      version='0.5.6',
 
       install_requires=[
           "tornado>=4.3",
