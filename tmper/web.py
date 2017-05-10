@@ -25,7 +25,7 @@ import pkg_resources
 dist = pkg_resources.get_distribution('tmper')
 
 def b64read(path, name):
-    return base64.b64encode(open(os.path.join(path, name)).read())
+    return base64.b64encode(open(os.path.join(path, name), 'rb').read())
 
 def _ascii(string):
     return string.encode('ascii', 'xmlcharrefreplace')
@@ -228,13 +228,18 @@ class Handler(tornado.web.RequestHandler):
         clis = ['curl', 'Wget', 'tmper']
         return any([i in agent for i in clis])
 
+    def cache_headers(self, nhours=24):
+        self.set_header('Cache-Control', 'public,max-age=%d' % int(3600*nhours))
+
 class HelpHandler(Handler):
     def get(self):
+        self.cache_headers()
         self.write(PAGE_HELP)
         self.finish()
 
 class DownloadHandler(Handler):
     def get(self):
+        self.cache_headers()
         self.write(PAGE_DOWNLOAD)
         self.finish()
 
@@ -283,6 +288,7 @@ class MainHandler(Handler):
             args = self.request.arguments.get('code', [''])[0]
 
         if not args:
+            self.cache_headers()
             self.write(PAGE_INDEX)
             self.finish()
         else:
@@ -356,6 +362,10 @@ class MainHandler(Handler):
             # separate the actual contents from the meta data
             body = fobj.pop('body')
             meta.update(fobj)
+
+            # strip paths from meta name (can't be done on client)
+            if 'filename' in meta:
+                meta['filename'] = os.path.basename(meta['filename'])
 
             # write the file and return the accepted name
             files.save_file(name, body, meta)
