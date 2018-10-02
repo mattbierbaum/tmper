@@ -8,18 +8,20 @@ import string
 import random
 import itertools
 import signal
-import logging
 import bcrypt
 
-import time
 import threading
 import parsedatetime
 import datetime
+import dateutil.parser
 
 import tornado.web
 import tornado.log
 import tornado.ioloop
 import tornado.template
+
+import logging
+logger = logging.getLogger('tmper')
 
 import pkg_resources
 dist = pkg_resources.get_distribution('tmper')
@@ -34,7 +36,17 @@ def key_hash(key, rounds=5):
     return bcrypt.hashpw(_ascii(key), bcrypt.gensalt(rounds))
 
 def key_check(key, hashed_key):
-    return (bcrypt.hashpw(_ascii(key), _ascii(hashed_key)) == hashed_key)
+    return (bcrypt.hashpw(_ascii(key), _ascii(hashed_key)) == _ascii(hashed_key))
+
+def tostring(obj):
+    if isinstance(obj, bytes):
+        return obj.decode()
+    return obj
+
+def tobytes(obj):
+    if isinstance(obj, str):
+        return obj.encode()
+    return obj
 
 #=============================================================================
 # web server functions and data
@@ -68,8 +80,8 @@ PAGE_ERROR = loader.load("error.html").generate(**subs)
 PAGE_DOWNLOAD = loader.load("download.html").generate(**subs)
 
 # also need to leave a few pages templated, let's use string.Template for ease
-TMPL_CODE = string.Template(PAGE_CODE)
-TMPL_ERROR = string.Template(PAGE_ERROR)
+TMPL_CODE = string.Template(tostring(PAGE_CODE))
+TMPL_ERROR = string.Template(tostring(PAGE_ERROR))
 
 #=============================================================================
 # helper functions that dont directly involve the web responses
@@ -103,7 +115,7 @@ class FileManager(object):
 
     def start_timer(self, codes):
         """ Takes either single code or list of codes and start timers """
-        codes = [codes] if isinstance(codes, str) else codes
+        codes = [codes] if not isinstance(codes, (set, list)) else codes
         for c in codes:
             if c in self.timers:
                 continue
@@ -120,9 +132,7 @@ class FileManager(object):
             self.delete_file(code)
 
     def cancel_timers(self):
-        for c in self.timers.keys():
-            timer = self.timers[c]
-
+        for code, timer in self.timers.items():
             if timer.isAlive():
                 timer.cancel()
         self.timers = {}
@@ -147,12 +157,12 @@ class FileManager(object):
         self.used_codes.update([name])
 
     def update_file(self, name, content):
-        with open(self.path(name), 'w') as f:
+        with open(self.path(name), 'wb') as f:
             f.write(content)
 
     def update_meta(self, name, meta):
         with open(self.pathj(name), 'w') as f:
-            f.write(json.dumps(meta))
+            json.dump(meta, f)
 
     def open_file(self, name):
         data = open(self.path(name)).read()
@@ -181,9 +191,7 @@ def dt2date(dt):
     return cal.parseDT(dt, datetime.datetime.now())[0]
 
 def str2date(string):
-    cal = parsedatetime.Calendar()
-    sec = time.mktime(cal.parse(string)[0])
-    return datetime.datetime.fromtimestamp(sec)
+    return dateutil.parser.parse(string)
 
 def date2diff(date):
     return (date - datetime.datetime.now()).total_seconds()
@@ -208,7 +216,7 @@ class Application(tornado.web.Application):
             (CODE_REGEX, MainHandler)
         ]
         super(Application, self).__init__(
-            handlers, default_handler_class=DefaultHandler, gzip=True
+            handlers, default_handler_class=DefaultHandler, gzip=True, debug=False
         )
 
 class Handler(tornado.web.RequestHandler):
@@ -219,12 +227,13 @@ class Handler(tornado.web.RequestHandler):
         if self.cli():
             self.write(text)
         else:
+            text = tostring(text)
             self.write(TMPL_ERROR.substitute(error=text))
         self.finish()
 
     def cli(self):
         """ Returns true if this URL was visited from the command line """
-        agent = self.request.headers['User-Agent']
+        agent = self.request.headers.get('User-Agent', '')
         clis = ['curl', 'Wget', 'tmper']
         return any([i in agent for i in clis])
 
@@ -282,10 +291,33 @@ class MainHandler(Handler):
             # otherwise, just download the file like usual
             self.serve_file(data, meta)
 
-    def get(self, args):
-        agent = self.request.headers['User-Agent']
+    def head(self, args):
         if not args:
-            args = self.request.arguments.get('code', [''])[0]
+            args = self.get_arg('code', '')
+
+        if not args:
+            self.finish()
+        else:
+            if not files.exists(args):
+                self.error('not found')
+                return
+
+            data, meta = files.open_file(args)
+            key = self.get_arg('key', '')
+
+            # check the key is present if required
+            if meta['key']:
+                if not key_check(key, meta['key']):
+                    self.error('invalid key')
+                    return
+
+            # write out the headers and finish
+            self.serve_file_headers(meta)
+            self.finish()
+
+    def get(self, args, headonly=False):
+        if not args:
+            args = self.get_arg('code', '')
 
         if not args:
             self.cache_headers()
@@ -297,7 +329,7 @@ class MainHandler(Handler):
                 return
 
             data, meta = files.open_file(args)
-            key = self.request.arguments.get('key', [''])[0]
+            key = self.get_arg('key', '')
 
             # check the key is present if required
             if meta['key']:
@@ -315,25 +347,30 @@ class MainHandler(Handler):
             # if we are on command line, just return data, otherwise display it pretty
             if self.cli():
                 self.serve_file(data, meta)
-            elif 'v' in self.request.arguments.keys():
+            elif 'v' in list(self.request.arguments.keys()):
                 self.write_formatted(data, meta)
             else:
                 self.serve_file(data, meta)
             self.finish()
 
+    def get_arg(self, key, default):
+        val = self.request.arguments.get(key, [default])[0]
+        val = tostring(val)
+        return val
+
     def post(self, args):
         meta = {}
-        codeonly = self.request.arguments.get('codeonly', [None])[0]
-        meta['key'] = self.request.arguments.get('key', [None])[0]
-        usern = int(self.request.arguments.get('n', [1])[0])
+        codeonly = self.get_arg('codeonly', None)
+        meta['key'] = self.get_arg('key', None)
+        usern = int(self.get_arg('n', 1))
         usern = max(min(usern, MAX_DOWNLOADS), 0)
         meta['n'] = usern
 
         if meta['key']:
-            meta['key'] = key_hash(meta['key'])
+            meta['key'] = tostring(key_hash(meta['key']))
 
         try:
-            time = dt2date(self.request.arguments.get('time', ['3 days'])[0])
+            time = dt2date(self.get_arg('time', '3 days'))
         except Exception as e:
             self.error('invalid time')
             return
@@ -342,7 +379,7 @@ class MainHandler(Handler):
         tmin = dt2date('1 min')
         tmax = dt2date('7 days')
         time = max(tmin, min(tmax, time))
-        meta['time'] = str(time)
+        meta['time'] = time.isoformat()
 
         # change to error occured since file already exists
         if args and files.exists(args):
@@ -357,7 +394,7 @@ class MainHandler(Handler):
                 self.error("no codes available")
                 return
 
-            fobj = self.request.files.values()[0][0]
+            fobj = list(self.request.files.values())[0][0]
 
             # separate the actual contents from the meta data
             body = fobj.pop('body')
