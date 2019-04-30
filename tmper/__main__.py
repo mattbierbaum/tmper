@@ -136,24 +136,39 @@ def main():
     action = args.get('action')
 
     if action == 'serve':
-        tmper.web.serve(
-            root=args.get('root'), port=args.get('port'), addr=args.get('addr')
-        )
+        try:
+            tmper.web.serve(
+                root=args.get('root'), port=args.get('port'),
+                addr=args.get('addr')
+            )
+        except Exception as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
 
     elif action == 'download':
-        tmper.util.download(
-            args.get('url'), args.get('code'), 
-            password=args.get('pass'), browser=args.get('browser'),
-            disp=args.get('progress')
-        )
+        try:
+            filename = tmper.util.download(
+                args.get('url'), args.get('code'),
+                password=args.get('pass'), browser=args.get('browser'),
+                disp=args.get('progress')
+            )
+            print(filename)
+        except Exception as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
 
     elif action == 'upload':
-        tmper.util.upload(
-            args.get('url'), args.get('filename'),
-            code=args.get('code'), num=args.get('num'),
-            password=args.get('pass'), time=args.get('time'),
-            disp=args.get('progress')
-        )
+        try:
+            code = tmper.util.upload(
+                args.get('url'), args.get('filename'),
+                code=args.get('code'), num=args.get('num'),
+                password=args.get('pass'), time=args.get('time'),
+                disp=args.get('progress')
+            )
+            print(code)
+        except Exception as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
 
     elif action == 'conf':
         tmper.util.conf(

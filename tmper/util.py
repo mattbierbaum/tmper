@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import re
 import os
-import sys
 import json
 import copy
 import webbrowser
@@ -13,7 +12,7 @@ from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 try:
     import urlparse
     from urllib import urlencode
-except:
+except Exception as e:
     # Python3 imports
     import urllib.parse as urlparse
     from urllib.parse import urlencode
@@ -25,15 +24,18 @@ from tmper import progress
 
 defaults = {'url': 'https://tmper.co/'}
 
-#=============================================================================
+
+# =============================================================================
 # command line utility features
-#=============================================================================
+# =============================================================================
 def conf_file():
     return os.path.expanduser('~/.tmper.json')
 
+
 def argformat(d):
-    out = {k:v for k,v in d.items() if v}
+    out = {k: v for k, v in d.items() if v}
     return '?'+urlencode(out) if out else ''
+
 
 def conf_read(key):
     defs = copy.deepcopy(defaults)
@@ -41,6 +43,7 @@ def conf_read(key):
     if os.path.exists(filename):
         defs.update(json.load(open(filename)))
     return defs.get(key)
+
 
 def conf(url='', password=''):
     filename = conf_file()
@@ -55,14 +58,14 @@ def conf(url='', password=''):
         cf.update({'pass': password})
     json.dump(cf, open(filename, 'w'))
 
+
 def download(url, code, password='', browser=False, disp=False):
     """ Download a file 'code' from the tmper 'url' """
     url = url or conf_read('url')
     password = password or conf_read('pass')
 
     if not url:
-        print("No URL provided! Provide one or set on via conf.")
-        sys.exit(1)
+        raise AssertionError("No URL provided! Provide one or set on via conf.")
 
     if browser:
         arg = argformat({'key': password, 'v': 1})
@@ -77,12 +80,11 @@ def download(url, code, password='', browser=False, disp=False):
 
     # if we get an error, print the error and stop
     if response.status_code != 200:
-        print(
+        raise KeyError(
             "Code '{}' not found at '{}', '{}'".format(
                 code, url, response.content.decode('utf-8')
-            ), file=sys.stderr
+            )
         )
-        sys.exit(1)
 
     headers = response.headers
 
@@ -91,7 +93,10 @@ def download(url, code, password='', browser=False, disp=False):
         '.*filename="(.*)"$', headers['Content-Disposition']
     ).groups()[0]
 
-    # make sure we are not overwriting any files by appending numbers to the end
+    filename = os.path.basename(filename)
+    filename = os.path.abspath(os.path.join('.', filename))
+
+    # make sure we are not overwriting any files by appending digits to the end
     if os.path.exists(filename):
         base, ext = os.path.splitext(filename)
         for i in range(1000):
@@ -104,13 +109,15 @@ def download(url, code, password='', browser=False, disp=False):
     nbytes = int(headers['Content-Length'])
     bar = progress.ProgressBar(nbytes, display=disp)
     with open(filename, 'wb') as f:
-        for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
+        response_iter = response.iter_content(chunk_size=chunk_size)
+        for i, chunk in enumerate(response_iter):
             f.write(chunk)
             bar.update(i*chunk_size)
     bar.update(nbytes)
 
     response.close()
-    print(filename)
+    return os.path.basename(filename)
+
 
 def upload(url, filename, code='', password='', num=1, time='', disp=False):
     """ Upload the file 'filename' to tmper url """
@@ -118,19 +125,15 @@ def upload(url, filename, code='', password='', num=1, time='', disp=False):
     password = password or conf_read('pass')
 
     if not url:
-        print("No URL provided! Provide one or set on via conf.", file=sys.stderr)
-        sys.exit(1)
+        raise AssertionError("No URL provided! Provide one or set on via conf.")
 
     url = url if not code else urlparse.urljoin(url, code)
     arg = {} if not password else {'key': password}
-    arg = arg if num == 1 else dict(arg, n=num)
+    arg = arg if num == 1 else dict(arg, n=str(num))
     arg = arg if time == '' else dict(arg, time=time)
 
-    name = os.path.basename(filename)
-
     if not os.path.exists(filename):
-        print("File '{}' does not exist".format(filename), file=sys.stderr)
-        sys.exit(1)
+        raise IOError("File '{}' does not exist".format(filename))
 
     def create_callback(encoder):
         bar = progress.ProgressBar(encoder.len, display=disp)
@@ -154,6 +157,6 @@ def upload(url, filename, code='', password='', num=1, time='', disp=False):
         }
 
         r = requests.post(url, data=monitor, headers=header)
-        print(r.content.decode('utf-8'))
+        code = r.content.decode('utf-8')
         r.close()
-
+        return code

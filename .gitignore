@@ -1,9 +1,12 @@
 *.pyc
 files/*
 .tmpr-files/*
+.tmper-files
 .tmper-files/*
+Pipfile*
 build/
 dist/
 tmpr.egg-info/
 tmper.egg-info/
 MANIFEST
+__pycache__
